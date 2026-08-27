@@ -1445,34 +1445,58 @@ function Planner() {
         })}
       </MapContainer>
 
-      {/* SLIDING RIGHT SIDE PANEL FOR MULTI-STOP ITINERARY, DISTANCE CALCULATOR & LOCATION DETAILS */}
+      {/* MOBILE BACKDROP OVERLAY — Tapping backdrop closes panel so user can tap map */}
+      {selectedAsset && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs md:hidden z-[999]"
+          onClick={() => setSelectedAsset(null)}
+        />
+      )}
+
+      {/* RESPONSIVE PANEL DRAWER (Bottom Sheet on Mobile, Right Panel on Desktop) */}
       <div
-        className={`absolute right-0 top-0 bottom-0 z-[1000] w-full max-w-sm sm:w-96 bg-white/95 backdrop-blur-md shadow-2xl border-l border-slate-200 dark:bg-slate-900/95 dark:border-slate-800 p-6 flex flex-col justify-between overflow-y-auto transform transition-transform duration-300 ease-out ${
-          selectedAsset || allOrderedWaypoints.length > 0 ? "translate-x-0" : "translate-x-full"
+        className={`fixed md:absolute right-0 bottom-0 left-0 md:left-auto top-auto md:top-0 z-[1000] w-full md:w-96 max-h-[88vh] md:max-h-full h-auto md:h-full bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl shadow-2xl border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 rounded-t-[32px] md:rounded-none flex flex-col justify-between overflow-hidden transform transition-all duration-300 ease-out ${
+          selectedAsset || allOrderedWaypoints.length > 0
+            ? "translate-y-0 md:translate-x-0"
+            : "translate-y-full md:translate-x-full"
         }`}
       >
-        <div className="flex flex-col h-full justify-between">
-          <div>
-            {/* PANEL HEADER */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-              <span className="rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-black uppercase text-teal-800 dark:bg-teal-950 dark:text-teal-300">
-                {selectedAsset ? `${selectedAsset.category || "LOCATION"}` : "MULTI-STOP PLANNER"}
-              </span>
+        <div className="flex flex-col h-full justify-between overflow-hidden">
+          
+          {/* FIXED PANEL HEADER */}
+          <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-white/90 dark:bg-slate-900/90">
+            <span className="rounded-full bg-teal-50 px-3 py-1 text-[11px] font-black uppercase text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+              {selectedAsset ? `${selectedAsset.category || "LOCATION"}` : "MULTI-STOP PLANNER"}
+            </span>
+
+            <div className="flex items-center gap-2">
+              {/* MOBILE TAP MAP BUTTON */}
+              <button
+                type="button"
+                onClick={() => setSelectedAsset(null)}
+                className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/80 px-3 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 transition border border-emerald-200/60 dark:border-emerald-800/40"
+              >
+                <Compass size={13} className="text-emerald-600" />
+                <span>Tap Map 🗺️</span>
+              </button>
 
               <button
                 type="button"
                 onClick={() => setSelectedAsset(null)}
-                className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 transition"
+                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 transition"
               >
                 <X size={18} />
               </button>
             </div>
+          </div>
 
+          {/* SCROLLABLE BODY CONTENT */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3.5">
             {selectedAsset ? (
               <>
                 {/* LOCATION IMAGE */}
                 {selectedAsset.image && !selectedAsset.isCustom && (
-                  <div className="mt-4 h-36 w-full overflow-hidden rounded-2xl bg-slate-100 shadow-xs">
+                  <div className="h-32 w-full overflow-hidden rounded-2xl bg-slate-100 shadow-xs">
                     <img
                       src={selectedAsset.image}
                       alt={selectedAsset.name}
@@ -1487,8 +1511,8 @@ function Planner() {
                 )}
 
                 {/* LOCATION TITLE & ADDRESS */}
-                <div className="mt-4">
-                  <h2 className="text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
+                <div>
+                  <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white leading-tight">
                     {selectedAsset.name}
                   </h2>
 
@@ -1499,7 +1523,7 @@ function Planner() {
                 </div>
 
                 {/* LATITUDE & LONGITUDE DISPLAY BOX */}
-                <div className="mt-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 p-3 dark:bg-slate-800/60 dark:border-slate-700">
+                <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-3 dark:bg-slate-800/60 dark:border-slate-700">
                   <p className="text-[10px] font-extrabold uppercase text-slate-400 dark:text-slate-500 mb-1">
                     GPS Coordinates
                   </p>
@@ -1517,14 +1541,14 @@ function Planner() {
 
                 {/* DESCRIPTION */}
                 {selectedAsset.description && (
-                  <p className="mt-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                     {selectedAsset.description}
                   </p>
                 )}
               </>
             ) : (
-              <div className="mt-4">
-                <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">
+              <div>
+                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
                   Multi-Stop Trip Itinerary
                 </h2>
                 <p className="mt-1 text-xs text-slate-500">
@@ -1533,8 +1557,8 @@ function Planner() {
               </div>
             )}
 
-            {/* TRAVEL DISTANCE & MODE CALCULATOR BOX (EMBEDDED INSIDE SIDE PANEL) */}
-            <div className="mt-4 rounded-2xl bg-slate-50 border border-slate-200/80 p-3.5 dark:bg-slate-800/70 dark:border-slate-700">
+            {/* TRAVEL DISTANCE & MODE CALCULATOR BOX */}
+            <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-3 dark:bg-slate-800/70 dark:border-slate-700">
               <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200/60 dark:border-slate-700">
                 <span className="text-[11px] font-black uppercase text-slate-800 dark:text-slate-200 flex items-center gap-1.5 tracking-wide">
                   <Compass size={15} className="text-teal-700 dark:text-teal-400" />
@@ -1631,7 +1655,7 @@ function Planner() {
 
                   <div className="flex flex-col">
                     <span className="text-[10px] font-bold text-teal-800 dark:text-teal-400 uppercase tracking-wide">
-                      Est. {travelMode === "bus" ? "Bus" : travelMode === "motorbike" ? "Bike" : travelMode === "biking" ? "Cycling" : travelMode === "walking" ? "Walking" : "Car"} Time
+                      Est. Time
                     </span>
                     <span className="text-sm font-black text-slate-900 dark:text-white">
                       {roadRoutes[0].durationText}
@@ -1639,7 +1663,7 @@ function Planner() {
                   </div>
                 </div>
               ) : (
-                <div className="mt-2 text-center p-1.5 text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                <div className="mt-2 text-center p-1 text-[11px] font-medium text-slate-500 dark:text-slate-400">
                   Select 🚩 <strong>Start</strong> and 🏁 <strong>Destination</strong> to calculate road distance.
                 </div>
               )}
@@ -1647,7 +1671,7 @@ function Planner() {
 
             {/* ACTIVE MULTI-STOP ITINERARY TIMELINE */}
             {allOrderedWaypoints.length > 0 && (
-              <div className="mt-3.5 rounded-2xl bg-slate-50 border border-slate-200 p-3 dark:bg-slate-800/80 dark:border-slate-700">
+              <div className="rounded-2xl bg-slate-50 border border-slate-200 p-3 dark:bg-slate-800/80 dark:border-slate-700">
                 <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
                   <span className="text-xs font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <ListOrdered size={15} className="text-teal-700 dark:text-teal-400" />
@@ -1661,7 +1685,7 @@ function Planner() {
                   )}
                 </div>
 
-                <div className="mt-2 space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                <div className="mt-2 space-y-1.5 max-h-32 overflow-y-auto pr-1">
                   {/* START ORIGIN */}
                   {startAsset && (
                     <div className="flex items-center justify-between rounded-xl bg-amber-50 border border-amber-200 p-1.5 text-xs font-bold text-amber-900 dark:bg-amber-950/60 dark:border-amber-800 dark:text-amber-200">
@@ -1735,70 +1759,69 @@ function Planner() {
             )}
           </div>
 
-          {/* ACTION BUTTONS CONTAINER */}
-          <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+          {/* FIXED BOTTOM ACTION BUTTONS BAR */}
+          <div className="p-4 pt-3 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900 space-y-2">
             {selectedAsset && (
-              <>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {/* BUTTON 1: SET AS START POINT */}
                 <button
                   type="button"
-                  onClick={() => setStartAsset(selectedAsset)}
-                  className={`w-full flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-extrabold text-white transition shadow-2xs ${
+                  onClick={() => {
+                    setStartAsset(selectedAsset);
+                    if (window.innerWidth < 768) setSelectedAsset(null);
+                  }}
+                  className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-3 text-xs font-extrabold text-white transition shadow-2xs ${
                     startAsset?.id === selectedAsset.id
                       ? "bg-amber-700 ring-2 ring-amber-400"
                       : "bg-amber-600 hover:bg-amber-700"
                   }`}
                 >
                   <Flag size={14} />
-                  {startAsset?.id === selectedAsset.id ? "✓ Set as Start Point" : "🚩 Set as Start Point"}
+                  <span>{startAsset?.id === selectedAsset.id ? "✓ Start Point" : "🚩 Set Start"}</span>
                 </button>
 
                 {/* BUTTON 2: ADD AS WAYPOINT STOP */}
                 <button
                   type="button"
-                  onClick={() => handleAddWaypoint(selectedAsset)}
+                  onClick={() => {
+                    handleAddWaypoint(selectedAsset);
+                    if (window.innerWidth < 768) setSelectedAsset(null);
+                  }}
                   disabled={waypointStops.some((s) => s.id === selectedAsset.id)}
-                  className={`w-full flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-extrabold text-white transition shadow-2xs ${
+                  className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-3 text-xs font-extrabold text-white transition shadow-2xs ${
                     waypointStops.some((s) => s.id === selectedAsset.id)
                       ? "bg-emerald-700 opacity-80"
                       : "bg-emerald-600 hover:bg-emerald-700"
                   }`}
                 >
                   <Plus size={14} />
-                  {waypointStops.some((s) => s.id === selectedAsset.id)
-                    ? "✓ Added to Stops List"
-                    : `🚏 Add as Stop #${waypointStops.length + 1}`}
+                  <span>
+                    {waypointStops.some((s) => s.id === selectedAsset.id)
+                      ? "✓ Added"
+                      : `🚏 Add Stop`}
+                  </span>
                 </button>
 
                 {/* BUTTON 3: MAKE DESTINATION */}
                 <button
                   type="button"
-                  onClick={() => setEndAsset(selectedAsset)}
-                  className={`w-full flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-extrabold text-white transition shadow-2xs ${
+                  onClick={() => {
+                    setEndAsset(selectedAsset);
+                    if (window.innerWidth < 768) setSelectedAsset(null);
+                  }}
+                  className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-3 text-xs font-extrabold text-white transition shadow-2xs ${
                     endAsset?.id === selectedAsset.id
                       ? "bg-rose-700 ring-2 ring-rose-400"
                       : "bg-rose-600 hover:bg-rose-700"
                   }`}
                 >
                   <Navigation size={14} />
-                  {endAsset?.id === selectedAsset.id ? "✓ Destination Set" : "🏁 Make Destination"}
+                  <span>{endAsset?.id === selectedAsset.id ? "✓ Destination" : "🏁 Destination"}</span>
                 </button>
-
-                {/* BUTTON 4: EXPLORE LOCATION DETAILS */}
-                {!selectedAsset.isCustom && (
-                  <button
-                    type="button"
-                    onClick={() => handleViewDetails(selectedAsset)}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-teal-700 py-2 text-xs font-extrabold text-white transition hover:bg-teal-800 shadow-2xs"
-                  >
-                    <ExternalLink size={14} />
-                    Explore Place Details
-                  </button>
-                )}
-              </>
+              </div>
             )}
 
-            {/* BUTTON 5: START JOURNEY (TURN-BY-TURN LIVE NAVIGATION) */}
+            {/* BUTTON 4: START JOURNEY (TURN-BY-TURN LIVE NAVIGATION) */}
             {startAsset && endAsset && roadRoutes.length > 0 && !isNavigating && (
               <button
                 type="button"
