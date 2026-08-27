@@ -1,0 +1,264 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   GLOBAL BRAND PALETTE & TYPOGRAPHY — Dribbble Travel UI/UX
+   Primary: Deep Emerald Navy (#0F291E)
+   Secondary: Vibrant Mint Teal (#159A9C)
+   Accent: Gold Star (#F4B942)
+   Background: Soft Emerald Cream (#F4F7F4)
+  ============================================================ */
+
+@theme {
+  --font-display: "Outfit", "Plus Jakarta Sans", sans-serif;
+  --color-primary: #1F3952;
+  --color-deep-navy: #1F3952;
+  --color-secondary: #62C8C2;
+  --color-brand-teal: #62C8C2;
+  --color-accent: #8ADBD5;
+  --color-light-teal: #8ADBD5;
+  --color-soft-white: #F4F7F4;
+  --color-card-bg: #FFFFFF;
+  --color-main-text: #172B3A;
+  --color-dark-navy: #172B3A;
+  --color-secondary-text: #64748B;
+  --color-border-gray: #E2E8F0;
+
+  /* Tailwind Teal Overrides to map all teal-* utility classes to user palette */
+  --color-teal-50: #f0fbfb;
+  --color-teal-100: #d8f5f3;
+  --color-teal-200: #8ADBD5;
+  --color-teal-300: #62C8C2;
+  --color-teal-400: #49b3ac;
+  --color-teal-500: #62C8C2;
+  --color-teal-600: #159a9c;
+  --color-teal-700: #0f766e;
+  --color-teal-800: #134e4a;
+  --color-teal-900: #0f291e;
+  --color-teal-950: #081711;
+
+  /* Tailwind Slate Overrides to align with user Slate & Dark Navy */
+  --color-slate-950: #08120c;
+  --color-slate-900: #0e1c15;
+  --color-slate-800: #182e23;
+  --color-slate-700: #294436;
+  --color-slate-600: #527363;
+  --color-slate-500: #64748B;
+  --color-slate-400: #94a3b8;
+  --color-slate-300: #cbd5e1;
+  --color-slate-200: #E2E8F0;
+  --color-slate-100: #f1f5f9;
+  --color-slate-50: #F4F7F4;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.015em;
+  background-color: #F4F7F4;
+  color: #122119;
+  transition: background-color 0.25s ease-out, color 0.25s ease-out;
+}
+
+html.dark body {
+  background-color: #08120c;
+  color: #F4F7F4;
+}
+
+h1, h2, h3, .font-display {
+  font-family: "Outfit", "Plus Jakarta Sans", sans-serif;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+/* Leaflet z-index fix for modal overlays */
+.leaflet-container {
+  z-index: 0;
+  font-family: inherit;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #62C8C2;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1F3952;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #8ADBD5;
+  border-radius: 9999px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #62C8C2;
+}
+
+/* Place gallery thumbnail scrollbar */
+.place-gallery-thumbnails::-webkit-scrollbar {
+  height: 4px;
+}
+
+/* Custom CSS Utility Classes */
+.glass-panel {
+  background: rgba(247, 249, 248, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.dark .glass-panel {
+  background: rgba(15, 28, 39, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Subtle Thin Borders & Layered Soft Shadows */
+.soft-card-shadow {
+  box-shadow: 0 4px 20px -2px rgba(23, 43, 58, 0.06), 0 2px 6px -1px rgba(23, 43, 58, 0.03);
+}
+
+.soft-card-shadow:hover {
+  box-shadow: 0 14px 32px -4px rgba(23, 43, 58, 0.12), 0 4px 12px -2px rgba(23, 43, 58, 0.06);
+}
+
+.dark .soft-card-shadow {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
+}
+
+.dark .soft-card-shadow:hover {
+  box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.65);
+}
+
+/* ============================================================
+   PERFORMANCE MICRO-TRANSITIONS & MOTION SYSTEM
+   🌿 Smooth Fade + Slide Up + Card Lift + Image Zoom + Soft Scale
+============================================================ */
+
+/* 1. Tourist Place Card Hover (250ms lift + shadow & 400ms image zoom) */
+.place-card {
+  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, background-color 0.25s ease-out, border-color 0.25s ease-out;
+}
+
+.place-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 32px rgba(38, 51, 45, 0.12);
+}
+
+.dark .place-card:hover {
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+}
+
+.place-card img {
+  transition: transform 0.4s ease-out;
+}
+
+.place-card:hover img {
+  transform: scale(1.05);
+}
+
+/* 2. Interactive Buttons & Nav Links (no harsh outline borders) */
+button, .btn-action, nav a, header a, a {
+  border-style: none;
+  outline: none;
+  transition: background-color 0.2s ease-out, border-color 0.2s ease-out, color 0.2s ease-out, transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+
+input, select, textarea {
+  transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out, background-color 0.2s ease-out;
+}
+
+/* 4. Page Section & Content Entrance (450ms fade + slide up) */
+@keyframes pageSectionEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-section-fade {
+  animation: pageSectionEntrance 0.45s ease-out forwards;
+}
+
+/* 5. Modal & Overlay Entrance (250ms fade + scale) */
+@keyframes modalScaleEntrance {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-enter {
+  animation: modalScaleEntrance 0.25s ease-out forwards;
+}
+
+/* ============================================================
+   MAP TYPOGRAPHY & POPUP / TOOLTIP STYLING
+   Modern, crisp, high-legibility typography for map elements
+============================================================ */
+.leaflet-popup-content-wrapper {
+  border-radius: 16px !important;
+  padding: 4px !important;
+  box-shadow: 0 12px 28px -5px rgba(0, 0, 0, 0.22), 0 8px 10px -6px rgba(0, 0, 0, 0.12) !important;
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif !important;
+  background: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px !important;
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif !important;
+  letter-spacing: -0.015em !important;
+}
+
+.leaflet-popup-tip {
+  background: #ffffff !important;
+}
+
+.leaflet-tooltip {
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 11px !important;
+  letter-spacing: -0.01em !important;
+  padding: 4px 10px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  color: #0f172a !important;
+  background-color: #ffffff !important;
+}
+
+.leaflet-tooltip-top::before {
+  border-top-color: #ffffff !important;
+}
