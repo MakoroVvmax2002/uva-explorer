@@ -888,6 +888,16 @@ function Planner() {
   const [navInstruction, setNavInstruction] = useState("");
   const [lastSpokenTime, setLastSpokenTime] = useState(0);
 
+  // TOP FLOATING TOAST FEEDBACK FOR AUTOMATIC MAP CLICKS
+  const [planToast, setPlanToast] = useState("");
+
+  const showPlanToast = (msg) => {
+    setPlanToast(msg);
+    setTimeout(() => {
+      setPlanToast((curr) => (curr === msg ? "" : curr));
+    }, 3200);
+  };
+
   // Pre-load Web Speech Synthesis female voices on mount
   useEffect(() => {
     if ("speechSynthesis" in window) {
@@ -1193,11 +1203,14 @@ function Planner() {
       .catch((e) => console.warn("API Places warning:", e));
   }, []);
 
-  // Handle clicking ANYWHERE on the map to drop a point & open side panel
+  // Handle clicking ANYWHERE on the map to add stops sequentially & collapse panel for full map view
   const handleMapClick = (latlng) => {
+    // Touching map closes side drawer for 100% full map view
+    setSelectedAsset(null);
+
     const newPoint = {
       id: `custom_${Date.now()}`,
-      name: "Selected Map Location",
+      name: `Custom Location (${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)})`,
       category: "Map Location",
       subCategory: "Custom GPS Coordinates",
       location: `Lat: ${latlng.lat.toFixed(5)}, Lng: ${latlng.lng.toFixed(5)}`,
@@ -1209,14 +1222,45 @@ function Planner() {
     };
 
     setCustomPoint(newPoint);
-    setSelectedAsset(newPoint);
 
     if (!startAsset) {
       // 1st Click -> Set as RED Start Point
       setStartAsset(newPoint);
+      showPlanToast("🚩 Start Point Set! Tap next spot for Destination.");
     } else if (!endAsset && startAsset.id !== newPoint.id) {
       // 2nd Click -> Set as BLUE Destination Point
       setEndAsset(newPoint);
+      showPlanToast("🏁 Destination Set! Road route calculated.");
+    } else if (startAsset && endAsset) {
+      // 3rd+ Clicks -> Automatically push previous endAsset to stops list, set new click as Destination
+      const prevEnd = endAsset;
+      setWaypointStops((prevStops) => [...prevStops, prevEnd]);
+      setEndAsset(newPoint);
+      showPlanToast(`🚏 Stop #${waypointStops.length + 1} Added! 🏁 New Destination Set.`);
+    }
+  };
+
+  // Handle clicking on specific asset markers (places/facilities/stands)
+  const handleSelectAssetAuto = (asset) => {
+    if (!asset) return;
+
+    if (!startAsset) {
+      setStartAsset(asset);
+      showPlanToast(`🚩 Start Point Set: ${asset.name}`);
+    } else if (!endAsset && startAsset.id !== asset.id) {
+      setEndAsset(asset);
+      showPlanToast(`🏁 Destination Set: ${asset.name}`);
+    } else if (startAsset && endAsset && endAsset.id !== asset.id) {
+      const prevEnd = endAsset;
+      setWaypointStops((prevStops) => [...prevStops, prevEnd]);
+      setEndAsset(asset);
+      showPlanToast(`🚏 Stop #${waypointStops.length + 1} Added: ${prevEnd.name} | 🏁 Destination: ${asset.name}`);
+    }
+
+    if (window.innerWidth < 768) {
+      setSelectedAsset(null);
+    } else {
+      setSelectedAsset(asset);
     }
   };
 
@@ -1264,6 +1308,34 @@ function Planner() {
 
   return (
     <div className="relative h-[calc(100vh-64px)] w-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
+      {/* FLOATING TOAST NOTIFICATION BANNER FOR AUTOMATIC MAP CLICKS */}
+      {planToast && !isNavigating && (
+        <div className="absolute top-5 left-1/2 -translate-x-1/2 z-[2000] animate-bounce pointer-events-none w-11/12 max-w-md text-center">
+          <div className="rounded-full bg-slate-900/95 text-white px-5 py-2.5 shadow-2xl backdrop-blur-md border border-emerald-400/50 flex items-center justify-center gap-2 text-xs sm:text-sm font-black">
+            <span>{planToast}</span>
+          </div>
+        </div>
+      )}
+
+      {/* TOP-LEFT FLOATING ITINERARY QUICK CONTROL BAR */}
+      {allOrderedWaypoints.length > 0 && !isNavigating && (
+        <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSelectedAsset(selectedAsset ? null : (startAsset || endAsset || allOrderedWaypoints[0]))}
+            className="flex items-center gap-2 rounded-full bg-slate-900/90 text-white hover:bg-slate-800 px-4 py-2.5 shadow-2xl backdrop-blur-md border border-slate-700 text-xs font-extrabold transition active:scale-95 cursor-pointer"
+          >
+            <ListOrdered size={15} className="text-emerald-400" />
+            <span>Itinerary ({allOrderedWaypoints.length} Points)</span>
+            {roadRoutes.length > 0 && (
+              <span className="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full text-[11px] font-black border border-emerald-500/30">
+                ~{roadRoutes[0].distanceKm} km
+              </span>
+            )}
+          </button>
+        </div>
+      )}
+
       {/* LIVE NAVIGATION TOP HUD BAR & WARNING BANNER */}
       {isNavigating && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[2000] w-11/12 max-w-xl">
@@ -1434,7 +1506,7 @@ function Planner() {
               position={[asset.lat, asset.lng]}
               icon={getAssetMarkerIcon(asset, isSelected, badge, isStart, isEnd)}
               eventHandlers={{
-                click: () => setSelectedAsset(asset),
+                click: () => handleSelectAssetAuto(asset),
               }}
             >
               <Tooltip direction="top" offset={[0, -32]}>
