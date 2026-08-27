@@ -1567,10 +1567,11 @@ function Planner() {
         style={{
           height:
             typeof window !== "undefined" && window.innerWidth < 768 && (selectedAsset || allOrderedWaypoints.length > 0)
-              ? `${sheetPercent}%`
+              ? `${sheetPercent}vh`
               : undefined,
+          maxHeight: typeof window !== "undefined" && window.innerWidth < 768 ? "82vh" : undefined,
         }}
-        className={`fixed md:absolute right-0 bottom-0 left-0 md:left-auto top-auto md:top-0 z-[1000] w-full md:w-96 md:h-full bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl shadow-2xl border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 rounded-t-[32px] md:rounded-none flex flex-col justify-between overflow-hidden transform transition-all duration-200 ease-out ${
+        className={`fixed md:absolute right-0 bottom-0 left-0 md:left-auto top-auto md:top-0 z-[1000] w-full md:w-96 md:h-full bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl shadow-2xl border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 rounded-t-[32px] md:rounded-none flex flex-col justify-between overflow-hidden transform transition-all duration-150 ease-out ${
           selectedAsset || allOrderedWaypoints.length > 0
             ? "translate-y-0 md:translate-x-0"
             : "translate-y-full md:translate-x-full"
@@ -1578,26 +1579,40 @@ function Planner() {
       >
         <div className="flex flex-col h-full justify-between overflow-hidden">
           
-          {/* TOP INTERACTIVE DRAG HANDLE SLIDER BAR FOR MOBILE (Circled in blue) */}
+          {/* TOP INTERACTIVE SLIDER BAR FOR MOBILE (Circled in blue in screenshot) */}
           <div
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            className="w-full pt-2.5 pb-1 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none bg-slate-100/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 shrink-0 md:hidden touch-none"
+            className="w-full pt-2.5 pb-2 px-4 flex flex-col items-center justify-center select-none bg-slate-100/95 dark:bg-slate-800/95 border-b border-slate-200/80 dark:border-slate-700/80 shrink-0 md:hidden touch-none"
           >
-            <div className="w-14 h-1.5 rounded-full bg-teal-600 dark:bg-teal-400 shadow-xs mb-0.5" />
-            <span className="text-[9px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">
-              {sheetPercent <= 18 ? "↑ Drag Up to Expand" : `Sheet Height: ${sheetPercent}% (Drag Up/Down)`}
+            {/* Visual Range Slider Control Bar */}
+            <div className="w-full max-w-xs flex items-center gap-2">
+              <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 shrink-0">15%</span>
+              <input
+                type="range"
+                min="15"
+                max="82"
+                step="1"
+                value={sheetPercent}
+                onChange={(e) => setSheetPercent(Number(e.target.value))}
+                className="w-full accent-teal-600 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-lg cursor-pointer appearance-auto"
+                title="Adjust Sheet Height"
+              />
+              <span className="text-[9px] font-black text-teal-700 dark:text-teal-400 shrink-0">{sheetPercent}%</span>
+            </div>
+            <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
+              ↕️ Drag Handle or Move Slider to Resize (Max 82%)
             </span>
           </div>
 
           {/* FIXED PANEL HEADER */}
-          <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-white/95 dark:bg-slate-900/95">
-            <span className="rounded-full bg-teal-50 px-3 py-1 text-[11px] font-black uppercase text-teal-800 dark:bg-teal-950 dark:text-teal-300">
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-white/95 dark:bg-slate-900/95">
+            <span className="rounded-full bg-teal-50 px-2.5 py-1 text-[10px] sm:text-[11px] font-black uppercase text-teal-800 dark:bg-teal-950 dark:text-teal-300 truncate max-w-[140px] sm:max-w-none">
               {selectedAsset ? `${selectedAsset.category || "LOCATION"}` : "MULTI-STOP PLANNER"}
             </span>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {/* SNAP PRESET BUTTONS FOR QUICK ACCESS */}
               <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-[10px] font-bold md:hidden">
                 <button
@@ -1630,13 +1645,13 @@ function Planner() {
                   setSelectedAsset(null);
                   setSheetPercent(15);
                 }}
-                className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/80 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 transition border border-emerald-200/60 dark:border-emerald-800/40"
+                className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/80 px-2 py-1 text-[11px] sm:text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 transition border border-emerald-200/60 dark:border-emerald-800/40"
               >
                 <Compass size={13} className="text-emerald-600" />
                 <span>Tap Map 🗺️</span>
               </button>
 
-              {/* RED CIRCLED CLOSE X BUTTON - NOW 100% GUARANTEED WORKING */}
+              {/* RED CIRCLED CLOSE X BUTTON */}
               <button
                 type="button"
                 onClick={(e) => {
@@ -1645,7 +1660,7 @@ function Planner() {
                   setSelectedAsset(null);
                   setSheetPercent(15);
                 }}
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/80 dark:hover:bg-rose-900 dark:text-rose-300 transition shrink-0 cursor-pointer border border-rose-200/80 dark:border-rose-800/60"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 hover:bg-rose-200 transition shrink-0 cursor-pointer border border-rose-300 dark:border-rose-800"
                 title="Close Panel"
                 aria-label="Close"
               >
