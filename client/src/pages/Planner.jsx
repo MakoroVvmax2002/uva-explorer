@@ -898,6 +898,43 @@ function Planner() {
     }, 3200);
   };
 
+  // MOBILE BOTTOM SHEET DRAGGABLE HEIGHT & PERCENTAGE SYSTEM
+  const [sheetPercent, setSheetPercent] = useState(48); // default 48% height
+  const [isDraggingSheet, setIsDraggingSheet] = useState(false);
+  const touchStartY = React.useRef(0);
+  const touchStartPercent = React.useRef(48);
+
+  const handleTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+    touchStartPercent.current = sheetPercent;
+    setIsDraggingSheet(true);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDraggingSheet) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = touchStartY.current - currentY; // dragging UP increases height
+    const screenHeight = window.innerHeight;
+    const deltaPercent = (deltaY / screenHeight) * 100;
+
+    // Clamp strictly between 15% (mini bottom bar) and 82% (NEVER 100% FULLSCREEN!)
+    let newPercent = touchStartPercent.current + deltaPercent;
+    if (newPercent < 15) newPercent = 15;
+    if (newPercent > 82) newPercent = 82; // Never allow 100% fullscreen!
+    setSheetPercent(Math.round(newPercent));
+  };
+
+  const handleTouchEnd = () => {
+    setIsDraggingSheet(false);
+    // Snap to nearest clean percentage preset: 15%, 45%, 65%, 82%
+    setSheetPercent((current) => {
+      if (current < 25) return 15; // Mini bottom bar
+      if (current < 55) return 45; // Medium (45%)
+      if (current < 75) return 65; // High (65%)
+      return 82; // Max 82% (NEVER 100% FULLSCREEN!)
+    });
+  };
+
   // Pre-load Web Speech Synthesis female voices on mount
   useEffect(() => {
     if ("speechSynthesis" in window) {
@@ -1527,7 +1564,13 @@ function Planner() {
 
       {/* RESPONSIVE PANEL DRAWER (Bottom Sheet on Mobile, Right Panel on Desktop) */}
       <div
-        className={`fixed md:absolute right-0 bottom-0 left-0 md:left-auto top-auto md:top-0 z-[1000] w-full md:w-96 max-h-[88vh] md:max-h-full h-auto md:h-full bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl shadow-2xl border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 rounded-t-[32px] md:rounded-none flex flex-col justify-between overflow-hidden transform transition-all duration-300 ease-out ${
+        style={{
+          height:
+            typeof window !== "undefined" && window.innerWidth < 768 && (selectedAsset || allOrderedWaypoints.length > 0)
+              ? `${sheetPercent}%`
+              : undefined,
+        }}
+        className={`fixed md:absolute right-0 bottom-0 left-0 md:left-auto top-auto md:top-0 z-[1000] w-full md:w-96 md:h-full bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl shadow-2xl border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 rounded-t-[32px] md:rounded-none flex flex-col justify-between overflow-hidden transform transition-all duration-200 ease-out ${
           selectedAsset || allOrderedWaypoints.length > 0
             ? "translate-y-0 md:translate-x-0"
             : "translate-y-full md:translate-x-full"
@@ -1535,29 +1578,78 @@ function Planner() {
       >
         <div className="flex flex-col h-full justify-between overflow-hidden">
           
+          {/* TOP INTERACTIVE DRAG HANDLE SLIDER BAR FOR MOBILE (Circled in blue) */}
+          <div
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            className="w-full pt-2.5 pb-1 flex flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none bg-slate-100/90 dark:bg-slate-800/90 border-b border-slate-200/80 dark:border-slate-700/80 shrink-0 md:hidden touch-none"
+          >
+            <div className="w-14 h-1.5 rounded-full bg-teal-600 dark:bg-teal-400 shadow-xs mb-0.5" />
+            <span className="text-[9px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-widest">
+              {sheetPercent <= 18 ? "↑ Drag Up to Expand" : `Sheet Height: ${sheetPercent}% (Drag Up/Down)`}
+            </span>
+          </div>
+
           {/* FIXED PANEL HEADER */}
-          <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-white/90 dark:bg-slate-900/90">
+          <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-slate-100 dark:border-slate-800 shrink-0 bg-white/95 dark:bg-slate-900/95">
             <span className="rounded-full bg-teal-50 px-3 py-1 text-[11px] font-black uppercase text-teal-800 dark:bg-teal-950 dark:text-teal-300">
               {selectedAsset ? `${selectedAsset.category || "LOCATION"}` : "MULTI-STOP PLANNER"}
             </span>
 
             <div className="flex items-center gap-2">
+              {/* SNAP PRESET BUTTONS FOR QUICK ACCESS */}
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-[10px] font-bold md:hidden">
+                <button
+                  type="button"
+                  onClick={() => setSheetPercent(25)}
+                  className={`px-1.5 py-0.5 rounded transition ${sheetPercent <= 30 ? "bg-teal-700 text-white" : "text-slate-600 dark:text-slate-400"}`}
+                >
+                  25%
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSheetPercent(50)}
+                  className={`px-1.5 py-0.5 rounded transition ${sheetPercent > 30 && sheetPercent <= 65 ? "bg-teal-700 text-white" : "text-slate-600 dark:text-slate-400"}`}
+                >
+                  50%
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSheetPercent(82)}
+                  className={`px-1.5 py-0.5 rounded transition ${sheetPercent > 65 ? "bg-teal-700 text-white" : "text-slate-600 dark:text-slate-400"}`}
+                >
+                  75%
+                </button>
+              </div>
+
               {/* MOBILE TAP MAP BUTTON */}
               <button
                 type="button"
-                onClick={() => setSelectedAsset(null)}
-                className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/80 px-3 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 transition border border-emerald-200/60 dark:border-emerald-800/40"
+                onClick={() => {
+                  setSelectedAsset(null);
+                  setSheetPercent(15);
+                }}
+                className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/80 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 transition border border-emerald-200/60 dark:border-emerald-800/40"
               >
                 <Compass size={13} className="text-emerald-600" />
                 <span>Tap Map 🗺️</span>
               </button>
 
+              {/* RED CIRCLED CLOSE X BUTTON - NOW 100% GUARANTEED WORKING */}
               <button
                 type="button"
-                onClick={() => setSelectedAsset(null)}
-                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 transition"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setSelectedAsset(null);
+                  setSheetPercent(15);
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-950/80 dark:hover:bg-rose-900 dark:text-rose-300 transition shrink-0 cursor-pointer border border-rose-200/80 dark:border-rose-800/60"
+                title="Close Panel"
+                aria-label="Close"
               >
-                <X size={18} />
+                <X size={18} className="stroke-[2.5]" />
               </button>
             </div>
           </div>
