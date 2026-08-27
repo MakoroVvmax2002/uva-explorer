@@ -1,6 +1,7 @@
 /**
  * Shared API configuration.
- * Set VITE_API_URL in client/.env to change the server address.
+ * Uses relative API calls in production (Vercel monorepo) or VITE_API_URL if set.
  */
 export const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.MODE === "production" ? "" : "http://localhost:5000");
