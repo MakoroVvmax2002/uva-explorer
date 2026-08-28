@@ -261,7 +261,7 @@ function Navbar({ onMenuClick, visitorName, onChangeNameRequest }) {
     : "U";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 md:px-8 backdrop-blur-xl dark:border-slate-800/80 dark:bg-[#08120c]/90 transition-colors">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 md:px-8 backdrop-blur-xl dark:border-slate-800/80 dark:bg-[#08120c]/90 transition-colors">
       {/* Left: hamburger (mobile) + search */}
       <div className="flex flex-1 items-center gap-3">
         {/* Mobile hamburger button */}

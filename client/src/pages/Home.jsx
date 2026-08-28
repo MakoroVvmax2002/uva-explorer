@@ -211,7 +211,7 @@ export default function Home() {
     <div className="w-full bg-[#F4F7F4] dark:bg-[#08120c] text-[#122119] dark:text-[#F4F7F4] transition-colors duration-300 pb-12">
       
       {/* 1. HERO SECTION — DRIBBBLE 27010990 LUXURY TRAVEL LANDING FRAME */}
-      <section className="relative mx-3 sm:mx-6 lg:mx-10 my-4 sm:my-6 rounded-[36px] lg:rounded-[44px] min-h-[580px] lg:min-h-[640px] flex flex-col justify-between overflow-hidden bg-slate-950 p-6 sm:p-10 lg:p-14 shadow-2xl border border-white/10">
+      <section className="relative isolate z-0 mx-3 sm:mx-6 lg:mx-10 my-4 sm:my-6 rounded-[36px] lg:rounded-[44px] min-h-[580px] lg:min-h-[640px] flex flex-col justify-between overflow-hidden bg-slate-950 p-6 sm:p-10 lg:p-14 shadow-2xl border border-white/10">
         
         {/* HERO CAROUSEL BACKGROUND (Auto-rotates every 3s with smooth crossfade & subtle scale) */}
         <div className="absolute inset-0 z-0 overflow-hidden">
