@@ -6,42 +6,6 @@ import L from "leaflet";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-// Location Pin for Destinations (Teal Pin)
-const destPinIcon = L.divIcon({
-  className: "custom-dest-pin",
-  html: `
-    <div style="background-color: #0f766e; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.35); transform: translate(-50%, -50%);">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-    </div>
-  `,
-  iconSize: [34, 34],
-  iconAnchor: [17, 17],
-  popupAnchor: [0, -17],
-});
-
-function createFacilityLogoIcon(emoji, bgColor) {
-  return L.divIcon({
-    className: "custom-facility-logo",
-    html: `
-      <div style="background-color: ${bgColor}; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.25); transform: translate(-50%, -50%);">
-        ${emoji}
-      </div>
-    `,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-    popupAnchor: [0, -14],
-  });
-}
-
-const facilityLogos = {
-  Hotel: createFacilityLogoIcon("🏨", "#2563eb"),
-  Restaurant: createFacilityLogoIcon("🍽️", "#ea580c"),
-  "Fuel Station": createFacilityLogoIcon("⛽", "#dc2626"),
-  "Medical / Hospital": createFacilityLogoIcon("🏥", "#16a34a"),
-  "Police Station": createFacilityLogoIcon("🛡️", "#4f46e5"),
-  "Bus Station": createFacilityLogoIcon("🚌", "#d97706"),
-};
-
 import { isPlaceSaved, toggleSavedPlace } from "../utils/savedPlaces";
 import { API_URL } from "../services/api";
 import { saveReviewToStore, getReviewsFromStore, deleteReviewFromStore } from "../utils/reviewStore";
@@ -82,38 +46,65 @@ import {
   Bike,
 } from "lucide-react";
 
-/** Helper to render small round vehicle/facility icons */
-const getFacilityItemIcon = (text = "") => {
-  const txtLower = text.toLowerCase();
-  if (txtLower.includes("motorcycle") || txtLower.includes("bike") || txtLower.includes("scooter")) {
-    return <Bike size={13} className="text-teal-700 dark:text-teal-300 shrink-0" />;
+// Fix Leaflet default icon safely
+try {
+  if (L && L.Icon && L.Icon.Default) {
+    const DefaultIcon = L.icon({
+      iconUrl: markerIcon,
+      shadowUrl: markerShadow,
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+    });
+    L.Marker.prototype.options.icon = DefaultIcon;
   }
-  if (txtLower.includes("tuk-tuk") || txtLower.includes("tuk tuk") || txtLower.includes("auto")) {
-    return <Bus size={13} className="text-teal-700 dark:text-teal-300 shrink-0" />;
-  }
-  if (txtLower.includes("car") || txtLower.includes("van") || txtLower.includes("parking") || txtLower.includes("vehicle")) {
-    return <Car size={13} className="text-teal-700 dark:text-teal-300 shrink-0" />;
-  }
-  if (txtLower.includes("bus") || txtLower.includes("train") || txtLower.includes("rail") || txtLower.includes("highway") || txtLower.includes("road") || txtLower.includes("trail") || txtLower.includes("walk") || txtLower.includes("hike")) {
-    return <Bus size={13} className="text-teal-700 dark:text-teal-300 shrink-0" />;
-  }
-  if (txtLower.includes("tea") || txtLower.includes("coffee") || txtLower.includes("food") || txtLower.includes("cafe") || txtLower.includes("restaurant") || txtLower.includes("snack") || txtLower.includes("dining") || txtLower.includes("fruit")) {
-    return <Coffee size={13} className="text-amber-700 dark:text-amber-300 shrink-0" />;
-  }
-  if (txtLower.includes("restroom") || txtLower.includes("toilet") || txtLower.includes("bench") || txtLower.includes("wifi") || txtLower.includes("signal") || txtLower.includes("4g") || txtLower.includes("bin") || txtLower.includes("gazebo") || txtLower.includes("lounge")) {
-    return <Clock size={13} className="text-sky-700 dark:text-sky-300 shrink-0" />;
-  }
-  return <Sparkles size={13} className="text-emerald-700 dark:text-emerald-300 shrink-0" />;
+} catch (e) {
+  console.warn("Leaflet default icon setup warning:", e);
+}
+
+// Location Pin for Destinations (Teal Pin)
+const getDestPinIcon = () => {
+  return L.divIcon({
+    className: "custom-dest-pin",
+    html: `
+      <div style="background-color: #0f766e; color: white; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.35); transform: translate(-50%, -50%);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+    `,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+    popupAnchor: [0, -17],
+  });
 };
 
-// Fix Leaflet default icon
-const DefaultIcon = L.icon({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-L.Marker.prototype.options.icon = DefaultIcon;
+function createFacilityLogoIcon(emoji, bgColor) {
+  return L.divIcon({
+    className: "custom-facility-logo",
+    html: `
+      <div style="background-color: ${bgColor}; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.25); transform: translate(-50%, -50%);">
+        ${emoji}
+      </div>
+    `,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -14],
+  });
+}
+
+const getFacilityLogoIcon = (category) => {
+  const emojiMap = {
+    Hotel: { emoji: "🏨", bg: "#2563eb" },
+    Restaurant: { emoji: "🍽️", bg: "#ea580c" },
+    "Fuel Station": { emoji: "⛽", bg: "#dc2626" },
+    "Medical / Hospital": { emoji: "🏥", bg: "#16a34a" },
+    "Police Station": { emoji: "🛡️", bg: "#4f46e5" },
+    "Bus Station": { emoji: "🚌", bg: "#d97706" },
+  };
+  const config = emojiMap[category];
+  if (config) {
+    return createFacilityLogoIcon(config.emoji, config.bg);
+  }
+  return getDestPinIcon();
+};
 
 /* =========================================================
    COORDINATE LOOKUP — known Uva Province locations
@@ -1665,7 +1656,7 @@ const FALLBACK_PLACES_MAP = {
                         }}
                       />
 
-                      <Marker position={mapCoords} icon={destPinIcon}>
+                      <Marker position={mapCoords} icon={getDestPinIcon()}>
                         <Popup>
                           <div className="text-center p-1">
                             <strong className="text-slate-900 text-sm">{place.name}</strong><br />
@@ -1691,7 +1682,7 @@ const FALLBACK_PLACES_MAP = {
                         <Marker
                           key={`fac-${fIdx}`}
                           position={facility.position}
-                          icon={facilityLogos[facility.category] || destPinIcon}
+                          icon={getFacilityLogoIcon(facility.category)}
                         >
                           <Popup>
                             <div className="p-1 text-center min-w-[160px] max-w-[200px]">
@@ -1701,6 +1692,7 @@ const FALLBACK_PLACES_MAP = {
                                   alt={facility.name}
                                   className="h-full w-full object-cover"
                                   onError={(e) => {
+                                    e.target.onerror = null;
                                     e.target.src = "/images/places/default.jpg";
                                   }}
                                 />
