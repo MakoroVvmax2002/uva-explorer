@@ -43,7 +43,7 @@ const DEFAULT_CENTER = [6.82977, 80.98457];
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY || "";
 
-// 4 High-Definition Professional Map Tile Layer Configurations (Strict 10x - 17x Zoom Limit)
+// 3 High-Definition Map Layers: MapTiler Streets-v4, MapTiler Hybrid-v4, and Weather Forecast Map
 const MAP_TILE_CONFIGS = {
   maptiler_streets: {
     name: "MapTiler Streets (v4)",
@@ -65,21 +65,15 @@ const MAP_TILE_CONFIGS = {
     maxNativeZoom: 17,
     attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   },
-  vibrant: {
-    name: "HOT Vibrant Map",
-    url: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+  weather_radar: {
+    name: "Weather Radar & Forecast",
+    url: MAPTILER_KEY
+      ? `https://api.maptiler.com/maps/outdoor-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
+      : "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
     subdomains: "abc",
     maxZoom: 17,
     maxNativeZoom: 17,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, Tiles by <a href="https://www.hotosm.org/">HOT</a>',
-  },
-  osm: {
-    name: "Standard OSM",
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    subdomains: "abc",
-    maxZoom: 17,
-    maxNativeZoom: 17,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    attribution: '&copy; Live Weather Radar & Forecast &copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a>',
   },
 };
 
@@ -1498,14 +1492,12 @@ function Planner() {
                 ? "🗺️ MapTiler Streets (v4)"
                 : mapStyle === "maptiler_hybrid"
                 ? "🛰️ Satellite Hybrid (v4)"
-                : mapStyle === "vibrant"
-                ? "🎨 HOT Vibrant Map"
-                : "🌍 Standard OSM"}
+                : "🌧️ Weather Forecast & Radar"}
             </span>
           </button>
 
           {showStyleMenu && (
-            <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl border border-slate-700 z-[2000] space-y-1">
+            <div className="absolute right-0 mt-2 w-60 rounded-2xl bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl border border-slate-700 z-[2000] space-y-1">
               <button
                 type="button"
                 onClick={() => { setMapStyle("maptiler_streets"); setShowStyleMenu(false); }}
@@ -1524,19 +1516,11 @@ function Planner() {
               </button>
               <button
                 type="button"
-                onClick={() => { setMapStyle("vibrant"); setShowStyleMenu(false); }}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "vibrant" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
+                onClick={() => { setMapStyle("weather_radar"); setShowStyleMenu(false); }}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "weather_radar" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
               >
-                <span>🎨 HOT Vibrant Map</span>
-                {mapStyle === "vibrant" && <span>✓</span>}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setMapStyle("osm"); setShowStyleMenu(false); }}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "osm" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
-              >
-                <span>🌍 Standard OSM</span>
-                {mapStyle === "osm" && <span>✓</span>}
+                <span>🌧️ Weather Forecast & Radar</span>
+                {mapStyle === "weather_radar" && <span>✓</span>}
               </button>
             </div>
           )}
@@ -1676,6 +1660,17 @@ function Planner() {
               opacity={0.95}
             />
           </>
+        )}
+
+        {/* LIVE DOPPLER RAIN RADAR & WEATHER FORECAST OVERLAY */}
+        {mapStyle === "weather_radar" && (
+          <TileLayer
+            key="weather-rain-radar-overlay"
+            url="https://tile.cache.rainviewer.com/v2/radar/nowcast/256/{z}/{x}/{y}/2/1_1.png"
+            maxZoom={17}
+            maxNativeZoom={17}
+            opacity={0.8}
+          />
         )}
 
         <ZoomSliderControl />
