@@ -70,6 +70,28 @@ function App() {
   });
   const [showWelcomeModal, setShowWelcomeModal] = useState(true);
 
+  // Background Route Prefetching: Downloads all page chunks during idle time for 0ms page switches
+  useEffect(() => {
+    const prefetchRoutes = () => {
+      import("./pages/Explore");
+      import("./pages/Planner");
+      import("./pages/Saved");
+      import("./pages/MapPage");
+      import("./pages/Facilities");
+      import("./pages/NearbyFacilities");
+      import("./pages/TransportFacilities");
+      import("./pages/PlaceDetails");
+      import("./pages/WeatherPage");
+      import("./pages/Settings");
+    };
+
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(prefetchRoutes);
+    } else {
+      setTimeout(prefetchRoutes, 800);
+    }
+  }, []);
+
   const handleSaveName = (name) => {
     setVisitorName(name);
     localStorage.setItem("visitorName", name);
