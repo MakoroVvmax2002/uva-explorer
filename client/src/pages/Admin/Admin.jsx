@@ -625,7 +625,6 @@ function Admin() {
 
   const resetForm = () => {
     setEditingId(null);
-
     setFormData({
       ...emptyForm,
       images: [],
@@ -2202,32 +2201,32 @@ function Admin() {
                     </div>
                     <div className="space-y-2">
                       {(formData.ticketInfo?.passes || []).map((pass, pIdx) => (
-                        <div key={pIdx} className="flex flex-wrap items-center gap-2 rounded-xl bg-white p-2.5 border border-slate-200 shadow-2xs">
+                        <div key={pIdx} className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-xl bg-white p-3 border border-slate-200 shadow-2xs max-w-full overflow-hidden box-border">
                           <input
                             type="text"
                             value={pass.type || ""}
                             onChange={(e) => updateTicketPass(pIdx, "type", e.target.value)}
                             placeholder="Pass Name / Type"
-                            className="flex-1 min-w-[140px] rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold outline-none focus:border-teal-600"
+                            className="w-full sm:flex-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold outline-none focus:border-teal-600 text-slate-900 bg-white box-border"
                           />
                           <input
                             type="text"
                             value={pass.price || ""}
                             onChange={(e) => updateTicketPass(pIdx, "price", e.target.value)}
                             placeholder="Price (e.g. LKR 500)"
-                            className="w-32 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold outline-none focus:border-teal-600 text-teal-800"
+                            className="w-full sm:w-32 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold outline-none focus:border-teal-600 text-teal-800 bg-white box-border"
                           />
                           <input
                             type="text"
                             value={pass.desc || ""}
                             onChange={(e) => updateTicketPass(pIdx, "desc", e.target.value)}
                             placeholder="Description / Requirements"
-                            className="flex-[2] min-w-[180px] rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-teal-600"
+                            className="w-full sm:flex-[2] rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs outline-none focus:border-teal-600 text-slate-900 bg-white box-border"
                           />
                           <button
                             type="button"
                             onClick={() => removeTicketPass(pIdx)}
-                            className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                            className="self-end sm:self-center p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
                             title="Remove Pass"
                           >
                             <Trash2 size={16} />
@@ -2243,10 +2242,10 @@ function Admin() {
             </div>
 
             {/* FACILITIES & AMENITIES CUSTOMIZER FOR ADMIN */}
-            <div className="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-5 shadow-xs">
+            <div className="md:col-span-2 rounded-2xl border border-slate-200 bg-slate-50/70 p-3 sm:p-5 shadow-xs max-w-full overflow-hidden box-border">
               <div className="flex items-center gap-2 border-b border-slate-200 pb-3 mb-4">
-                <Car className="text-teal-700" size={20} />
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800">
+                <Car className="text-teal-700 shrink-0" size={20} />
+                <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800">
                   Facilities, Parking, Transport & Amenities Customizer
                 </h3>
               </div>
@@ -2259,16 +2258,16 @@ function Admin() {
                   { key: "utilities", title: "Utilities & Comfort", icon: Clock },
                   { key: "other", title: "Highlights & Special Features", icon: Sparkles },
                 ].map((cat) => (
-                  <div key={cat.key} className="rounded-xl border border-slate-200/80 bg-white p-3.5 shadow-2xs">
-                    <div className="flex items-center justify-between mb-3">
+                  <div key={cat.key} className="rounded-xl border border-slate-200/80 bg-white p-3 sm:p-3.5 shadow-2xs max-w-full overflow-hidden box-border">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider text-slate-800">
-                        <cat.icon size={15} className="text-teal-700" />
+                        <cat.icon size={15} className="text-teal-700 shrink-0" />
                         <span>{cat.title}</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => addFacilityItem(cat.key)}
-                        className="flex items-center gap-1 text-[11px] font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200 hover:bg-teal-100 transition"
+                        className="flex items-center gap-1 text-[11px] font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200 hover:bg-teal-100 transition w-fit"
                       >
                         <Plus size={13} />
                         Add {cat.title.split(" ")[0]} Item
@@ -2280,25 +2279,25 @@ function Admin() {
                         <p className="text-[11px] text-slate-400 italic py-1">No items added yet. Click "Add Item" to add facility features.</p>
                       ) : (
                         (formData.facilities?.[cat.key] || []).map((item, fIdx) => (
-                          <div key={fIdx} className="flex items-center gap-2 rounded-lg border border-slate-100 bg-slate-50/80 p-2">
+                          <div key={fIdx} className="flex flex-col sm:flex-row sm:items-center gap-2 rounded-lg border border-slate-200 bg-slate-50/90 p-2.5 max-w-full overflow-hidden box-border">
                             <input
                               type="text"
                               value={item.text || ""}
                               onChange={(e) => updateFacilityItem(cat.key, fIdx, "text", e.target.value)}
                               placeholder="Feature / Detail (e.g. Dedicated Car Parking Lot)"
-                              className="flex-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-semibold outline-none focus:border-teal-600 bg-white"
+                              className="w-full sm:flex-1 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-semibold outline-none focus:border-teal-600 bg-white text-slate-900 box-border"
                             />
                             <input
                               type="text"
                               value={item.status || ""}
                               onChange={(e) => updateFacilityItem(cat.key, fIdx, "status", e.target.value)}
                               placeholder="Status Badge (e.g. LKR 50 / Free / Available)"
-                              className="w-36 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-bold outline-none focus:border-teal-600 text-teal-800 bg-white"
+                              className="w-full sm:w-36 rounded-md border border-slate-200 px-2.5 py-1.5 text-xs font-bold outline-none focus:border-teal-600 text-teal-800 bg-white box-border"
                             />
                             <button
                               type="button"
                               onClick={() => removeFacilityItem(cat.key, fIdx)}
-                              className="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                              className="self-end sm:self-center p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition shrink-0"
                               title="Delete facility item"
                             >
                               <Trash2 size={15} />
