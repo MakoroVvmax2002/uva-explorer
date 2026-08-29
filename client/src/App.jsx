@@ -99,14 +99,14 @@ function App() {
         {/* Mobile overlay backdrop */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 z-30 bg-black/50 md:hidden"
+            className="fixed inset-0 z-[150] bg-black/50 md:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Sidebar — hidden on mobile unless open */}
         <div
-          className={`fixed inset-y-0 left-0 z-40 transition-transform duration-300 md:relative md:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-[200] transition-transform duration-300 md:relative md:translate-x-0 md:z-auto ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -117,14 +117,14 @@ function App() {
         </div>
 
         {/* Main content */}
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col relative z-0">
           <Navbar
             onMenuClick={() => setSidebarOpen((prev) => !prev)}
             visitorName={visitorName}
             onChangeNameRequest={() => setShowWelcomeModal(true)}
           />
 
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto relative z-0">
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<Home />} />

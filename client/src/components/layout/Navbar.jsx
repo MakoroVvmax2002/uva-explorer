@@ -261,7 +261,7 @@ function Navbar({ onMenuClick, visitorName, onChangeNameRequest }) {
     : "U";
 
   return (
-    <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 md:px-8 backdrop-blur-xl dark:border-slate-800/80 dark:bg-[#08120c]/90 transition-colors">
+    <header className="relative z-[100] flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 md:px-8 backdrop-blur-xl dark:border-slate-800/80 dark:bg-[#08120c]/90 transition-colors">
       {/* Left: hamburger (mobile) + search */}
       <div className="flex flex-1 items-center gap-3">
         {/* Mobile hamburger button */}
@@ -304,7 +304,7 @@ function Navbar({ onMenuClick, visitorName, onChangeNameRequest }) {
 
           {/* OMNI SEARCH LIVE DROPDOWN MENU */}
           {showSearchDropdown && searchResults.length > 0 && (
-            <div className="absolute left-0 right-0 mt-2 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 z-50 animate-in fade-in duration-150">
+            <div className="absolute left-0 right-0 mt-2 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 z-[100] animate-in fade-in duration-150">
               <div className="border-b border-slate-100 bg-slate-50/80 px-4 py-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-400 dark:border-slate-800 dark:bg-slate-800/50">
                 Quick Results across Uva Explorer
               </div>
@@ -349,7 +349,7 @@ function Navbar({ onMenuClick, visitorName, onChangeNameRequest }) {
         {/* Sun / Moon Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-700 transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-[#334155] transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
           aria-label="Toggle light/dark theme"
         >
@@ -378,7 +378,7 @@ function Navbar({ onMenuClick, visitorName, onChangeNameRequest }) {
 
           {/* NOTIFICATIONS DROPDOWN MENU */}
           {showNotifications && (
-            <div className="absolute right-0 mt-3 w-80 sm:w-96 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute right-0 mt-3 w-80 sm:w-96 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <div className="flex items-center gap-2">
