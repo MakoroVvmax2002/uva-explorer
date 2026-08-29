@@ -746,7 +746,7 @@ function Explore() {
 
               <button
                 type="button"
-                onClick={clearSearch}
+                onClick={resetFilters}
                 className="mt-6 rounded-xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-teal-800"
               >
                 Clear Filters

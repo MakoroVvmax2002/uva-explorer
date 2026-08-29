@@ -41,6 +41,34 @@ import {
 // DEFAULT MAP CENTER: Bandarawela Central Hub, Uva Province
 const DEFAULT_CENTER = [6.82977, 80.98457];
 
+// High-Definition Professional Map Tile Layer Configurations
+const MAP_TILE_CONFIGS = {
+  voyager: {
+    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    subdomains: "abcd",
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  },
+  satellite: {
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    subdomains: [],
+    maxZoom: 19,
+    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+  },
+  dark: {
+    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+    subdomains: "abcd",
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  },
+  osm: {
+    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    subdomains: "abc",
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  },
+};
+
 // Comprehensive Catalog of Places, Nearby Facilities, and Transport Stands
 const ALL_MAP_ASSETS = [
   // --- 1. PLACES & ATTRACTIONS ---
@@ -869,6 +897,11 @@ function Planner() {
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [customPoint, setCustomPoint] = useState(null);
 
+  // MAP ENGINE STYLE & CATEGORY FILTER STATE
+  const [mapStyle, setMapStyle] = useState("voyager"); // "voyager", "satellite", "dark", "osm"
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [showStyleMenu, setShowStyleMenu] = useState(false);
+
   // TRAVEL MODE & MULTI-STOP ROUTING STATE
   const [travelMode, setTravelMode] = useState("driving"); // "driving", "motorbike", "biking", "walking"
   const [startAsset, setStartAsset] = useState(null);
@@ -1341,7 +1374,19 @@ function Planner() {
     };
   }, [routeKey]);
 
-
+  // Filtered map assets based on category filter
+  const filteredMapAssets = useMemo(() => {
+    if (categoryFilter === "all") return mapAssets;
+    return mapAssets.filter((asset) => {
+      if (categoryFilter === "place") return asset.category === "place";
+      if (categoryFilter === "transport") return asset.category === "transport";
+      if (categoryFilter === "hotel") return asset.category === "facility" && asset.iconType === "hotel";
+      if (categoryFilter === "hospital") return asset.category === "facility" && asset.iconType === "hospital";
+      if (categoryFilter === "fuel") return asset.category === "facility" && asset.iconType === "fuel";
+      if (categoryFilter === "police") return asset.category === "facility" && asset.iconType === "police";
+      return true;
+    });
+  }, [mapAssets, categoryFilter]);
 
   return (
     <div className="relative h-[calc(100vh-64px)] w-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
@@ -1372,6 +1417,83 @@ function Planner() {
           </button>
         </div>
       )}
+
+      {/* TOP-RIGHT FLOATING MAP CONTROLS & STYLE SWITCHER */}
+      <div className="absolute top-4 right-4 z-[1000] flex flex-col items-end gap-2">
+        {/* MAP STYLE PICKER BUTTON */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowStyleMenu(!showStyleMenu)}
+            className="flex items-center gap-2 rounded-full bg-slate-900/90 text-white hover:bg-slate-800 px-3.5 py-2 shadow-2xl backdrop-blur-md border border-slate-700 text-xs font-extrabold transition active:scale-95 cursor-pointer"
+          >
+            <Compass size={15} className="text-teal-400" />
+            <span className="capitalize">{mapStyle}</span>
+            <span className="text-[10px] bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-500/30">
+              {mapStyle === "voyager" ? "🗺️ Vector" : mapStyle === "satellite" ? "🛰️ 3D Sat" : mapStyle === "dark" ? "🌙 Dark" : "🌍 Standard"}
+            </span>
+          </button>
+
+          {showStyleMenu && (
+            <div className="absolute right-0 mt-2 w-48 rounded-2xl bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl border border-slate-700 z-[2000] space-y-1">
+              <button
+                type="button"
+                onClick={() => { setMapStyle("voyager"); setShowStyleMenu(false); }}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "voyager" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
+              >
+                <span>🗺️ Carto Voyager</span>
+                {mapStyle === "voyager" && <span>✓</span>}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMapStyle("satellite"); setShowStyleMenu(false); }}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "satellite" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
+              >
+                <span>🛰️ ESRI 3D Satellite</span>
+                {mapStyle === "satellite" && <span>✓</span>}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMapStyle("dark"); setShowStyleMenu(false); }}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "dark" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
+              >
+                <span>🌙 Dark Mode</span>
+                {mapStyle === "dark" && <span>✓</span>}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMapStyle("osm"); setShowStyleMenu(false); }}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "osm" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
+              >
+                <span>🌍 Standard OSM</span>
+                {mapStyle === "osm" && <span>✓</span>}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* CATEGORY FILTER CHIPS BAR */}
+        <div className="hidden sm:flex items-center gap-1 rounded-full bg-slate-900/90 p-1.5 shadow-2xl backdrop-blur-md border border-slate-700 text-xs font-bold">
+          {[
+            { id: "all", label: "All", icon: "📍" },
+            { id: "place", label: "Places", icon: "🌿" },
+            { id: "hotel", label: "Hotels", icon: "🏨" },
+            { id: "hospital", label: "Medical", icon: "🏥" },
+            { id: "fuel", label: "Fuel", icon: "⛽" },
+            { id: "transport", label: "Stands", icon: "🚌" },
+          ].map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setCategoryFilter(cat.id)}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold transition ${categoryFilter === cat.id ? "bg-teal-600 text-white shadow-xs" : "text-slate-300 hover:bg-slate-800"}`}
+            >
+              <span>{cat.icon}</span>
+              <span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* LIVE NAVIGATION TOP HUD BAR & WARNING BANNER */}
       {isNavigating && (
@@ -1458,8 +1580,11 @@ function Planner() {
       {/* 100% FULL-SCREEN LEAFLET MAP */}
       <MapContainer center={DEFAULT_CENTER} zoom={11} scrollWheelZoom={true} className="h-full w-full">
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          key={`tile-${mapStyle}`}
+          url={MAP_TILE_CONFIGS[mapStyle].url}
+          subdomains={MAP_TILE_CONFIGS[mapStyle].subdomains}
+          maxZoom={MAP_TILE_CONFIGS[mapStyle].maxZoom}
+          attribution={MAP_TILE_CONFIGS[mapStyle].attribution}
         />
 
         <MapFlyToController flyTargetCoords={flyTargetCoords} />
@@ -1526,7 +1651,7 @@ function Planner() {
         )}
 
         {/* RENDER ALL CATALOG ASSET MARKERS */}
-        {mapAssets.map((asset) => {
+        {filteredMapAssets.map((asset) => {
           const isSelected = selectedAsset?.id === asset.id;
           const isStart = startAsset?.id === asset.id;
           const isEnd = endAsset?.id === asset.id;
@@ -1579,31 +1704,15 @@ function Planner() {
       >
         <div className="flex flex-col h-full justify-between overflow-hidden">
           
-          {/* TOP INTERACTIVE SLIDER BAR FOR MOBILE (Circled in blue in screenshot) */}
+          {/* NATIVE SLEEK DRAG HANDLE PILL FOR MOBILE (Photo 02 style) */}
           <div
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            className="w-full pt-2.5 pb-2 px-4 flex flex-col items-center justify-center select-none bg-slate-100/95 dark:bg-slate-800/95 border-b border-slate-200/80 dark:border-slate-700/80 shrink-0 md:hidden touch-none"
+            onClick={() => setSheetPercent(sheetPercent < 45 ? 65 : 25)}
+            className="w-full py-2.5 flex items-center justify-center select-none shrink-0 md:hidden cursor-grab active:cursor-grabbing touch-none"
           >
-            {/* Visual Range Slider Control Bar */}
-            <div className="w-full max-w-xs flex items-center gap-2">
-              <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 shrink-0">15%</span>
-              <input
-                type="range"
-                min="15"
-                max="82"
-                step="1"
-                value={sheetPercent}
-                onChange={(e) => setSheetPercent(Number(e.target.value))}
-                className="w-full accent-teal-600 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-lg cursor-pointer appearance-auto"
-                title="Adjust Sheet Height"
-              />
-              <span className="text-[9px] font-black text-teal-700 dark:text-teal-400 shrink-0">{sheetPercent}%</span>
-            </div>
-            <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
-              ↕️ Drag Handle or Move Slider to Resize (Max 82%)
-            </span>
+            <div className="w-12 h-1.5 rounded-full bg-slate-300 dark:bg-slate-700 hover:bg-slate-400 transition" />
           </div>
 
           {/* FIXED PANEL HEADER */}
