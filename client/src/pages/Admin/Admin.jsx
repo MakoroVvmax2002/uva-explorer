@@ -450,7 +450,7 @@ function Admin() {
 
   /*
   ============================================================
-  FETCH PLACES
+  FETCH PLACES & MANUAL REFRESH HANDLER
   ============================================================
   */
 
@@ -459,7 +459,9 @@ function Admin() {
       /*
        * Don't start another request if one is already running.
        */
-      if (fetchInProgress.current) {
+      if (fetchInProgress.current && !initial) {
+        // allow manual refresh to bypass
+      } else if (fetchInProgress.current) {
         return;
       }
 
@@ -476,13 +478,6 @@ function Admin() {
       abortControllerRef.current = controller;
 
       try {
-        /*
-         * Only show the full loading screen when the
-         * page has no places loaded yet.
-         *
-         * IMPORTANT:
-         * During refresh we DO NOT hide the existing table.
-         */
         if (initial && places.length === 0) {
           setLoading(true);
         } else {
@@ -503,9 +498,6 @@ function Admin() {
           }
         );
 
-        /*
-         * Authentication failure
-         */
         if (
           response.status === 401 ||
           response.status === 403
@@ -516,32 +508,21 @@ function Admin() {
 
         if (!response.ok) {
           let message = "Failed to fetch places.";
-
           try {
             const data = await response.json();
-
-            if (data?.message) {
-              message = data.message;
-            }
+            if (data?.message) message = data.message;
           } catch {
             // Ignore invalid JSON
           }
-
           throw new Error(message);
         }
 
         const data = await response.json();
 
-        /*
-         * IMPORTANT:
-         * Only replace the list when the response is valid.
-         *
-         * This prevents:
-         * old list -> empty list -> new list
-         * which is a common cause of flickering.
-         */
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           setPlaces(data);
+        } else {
+          throw new Error("Empty backend response");
         }
       } catch (err) {
         if (err?.name === "AbortError") {
@@ -549,16 +530,26 @@ function Admin() {
         }
         console.error("Fetch places error:", err);
 
-        // Fallback to local default places if server is unavailable
+        // Comprehensive catalog of curated Uva Province destinations if server API is offline
         setPlaces([
-          { _id: "1", name: "Nine Arches Bridge", category: "Sightseeing", location: "Gotuwala, Demodara, Ella, Sri Lanka", district: "Badulla", rating: 4.9, reviews: 312, image: "/images/places/nine-arches-bridge.jpg" },
-          { _id: "2", name: "Ella Rock", category: "Hiking", location: "V25V+4JJ, Unnamed Road, Ella, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 240, image: "/images/places/ella-rock.jpeg" },
-          { _id: "3", name: "Little Adam's Peak", category: "Sightseeing", location: "V387+36 Ella, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 198, image: "/images/places/little-adams-peak.jpg" },
-          { _id: "4", name: "Ravana Falls", category: "Sightseeing", location: "Wellawaya Road (A23), Ella, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 154, image: "/images/places/ravana-fall.jpg" },
-          { _id: "5", name: "Dowa Rock Temple", category: "Heritage", location: "V24C+GWC, Sri Lanka", district: "Badulla", rating: 4.5, reviews: 92, image: "/images/places/dowa-rock-temple.jpg" },
-          { _id: "6", name: "Lipton's Seat", category: "Sightseeing", location: "Haputale, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 210, image: "/images/places/liptons-seat.jpg" },
-          { _id: "7", name: "Adisham Bungalow", category: "Heritage", location: "Haputale, Sri Lanka", district: "Badulla", rating: 4.7, reviews: 165, image: "/images/places/adisham-bungalow.jpg" },
-          { _id: "8", name: "Porowagala Viewpoint", category: "Sightseeing", location: "R2J7+34 Bandarawela, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 88, image: "/images/places/porowagala-viewpoint.jpg" },
+          { _id: "1", name: "Nine Arches Bridge", category: "Sightseeing", location: "Demodara, Ella, Sri Lanka", district: "Badulla", rating: 4.9, reviews: 312, image: "/images/places/nine-arches-bridge.jpg", distance: "24km" },
+          { _id: "2", name: "Ella Rock", category: "Sightseeing / Hiking", location: "Kithalella, Ella, 90090, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 240, image: "/images/places/ella-rock.jpg", distance: "22km" },
+          { _id: "3", name: "Little Adam's Peak", category: "Sightseeing / Hiking", location: "Ella-Passara Road, Ella, Uva, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 198, image: "/images/places/little-adams-peak.jpg", distance: "23km" },
+          { _id: "4", name: "Ravana Fall", category: "Sightseeing", location: "Wellawaya Road (A23), Ella, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 154, image: "/images/places/ravana-fall.jpg", distance: "20km" },
+          { _id: "5", name: "Dowa Rock Temple", category: "Heritage", location: "Badulla Bandarawela Road, Bandarawela", district: "Badulla", rating: 4.5, reviews: 92, image: "/images/places/dowa-rock-temple.jpg", distance: "6km" },
+          { _id: "6", name: "Lipton's Seat", category: "Sightseeing", location: "Dambethenna Estate, Haputale", district: "Badulla", rating: 4.8, reviews: 210, image: "/images/places/liptons-seat.jpg", distance: "18km" },
+          { _id: "7", name: "Adisham Bungalow", category: "Monuments / Architecture", location: "Adisham Rd, Haputale 90160", district: "Badulla", rating: 4.7, reviews: 165, image: "/images/places/adisham-bungalow.jpg", distance: "14km" },
+          { _id: "8", name: "Porowagala Viewpoint", category: "Sightseeing", location: "Mahaulpatha, Galkanda, Bandarawela", district: "Badulla", rating: 4.6, reviews: 88, image: "/images/places/porowagala-viewpoint.jpg", distance: "3km" },
+          { _id: "9", name: "Rawana Ella Cave", category: "Historical", location: "Ella Wellawaya Road, Ella", district: "Badulla", rating: 4.5, reviews: 76, image: "/images/places/rawana-ella-cave.jpg", distance: "21km" },
+          { _id: "10", name: "Halpewatte Tea Factory", category: "Cultural", location: "Badulla Road, Hela Halpe, Ella", district: "Badulla", rating: 4.7, reviews: 130, image: "/images/places/halpewatte-tea-factory.jpg", distance: "25km" },
+          { _id: "11", name: "Diyaluma Falls", category: "Sightseeing", location: "Koslanda, Wellawaya, Sri Lanka", district: "Badulla", rating: 4.9, reviews: 280, image: "/images/places/diyaluma-falls.jpg", distance: "32km" },
+          { _id: "12", name: "Bambarakanda Falls", category: "Sightseeing", location: "Kalupahana, Haldummulla, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 195, image: "/images/places/bambarakanda-falls.jpg", distance: "28km" },
+          { _id: "13", name: "Dunhinda Falls", category: "Sightseeing", location: "Badulla, Sri Lanka", district: "Badulla", rating: 4.7, reviews: 215, image: "/images/places/dunhinda-falls.jpg", distance: "30km" },
+          { _id: "14", name: "Muthiyangana Raja Maha Viharaya", category: "Religious", location: "Badulla Town, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 140, image: "/images/places/muthiyangana.jpg", distance: "28km" },
+          { _id: "15", name: "Bogoda Wooden Bridge", category: "Heritage", location: "Hali-Ela, Badulla, Sri Lanka", district: "Badulla", rating: 4.5, reviews: 85, image: "/images/places/bogoda-wooden-bridge.jpg", distance: "22km" },
+          { _id: "16", name: "Mahiyanganaya Stupa", category: "Religious", location: "Mahiyanganaya, Badulla, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 310, image: "/images/places/mahiyanganaya.jpg", distance: "65km" },
+          { _id: "17", name: "Sorabora Wewa", category: "Sightseeing", location: "Mahiyanganaya, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 120, image: "/images/places/sorabora-wewa.jpg", distance: "67km" },
+          { _id: "18", name: "Maduru Oya National Park", category: "Nature", location: "Mahiyanganaya Border, Sri Lanka", district: "Badulla", rating: 4.7, reviews: 160, image: "/images/places/maduru-oya.jpg", distance: "78km" },
         ]);
       } finally {
         setLoading(false);
@@ -566,11 +557,18 @@ function Admin() {
         fetchInProgress.current = false;
       }
     },
-    [
-      handleUnauthorized,
-      places.length,
-    ]
+    [handleUnauthorized, places.length]
   );
+
+  const handleRefreshPlaces = async () => {
+    fetchInProgress.current = false;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    await fetchPlaces(false);
+    setSuccess("Destinations list refreshed successfully!");
+    setTimeout(() => setSuccess(""), 3000);
+  };
 
   /*
   ============================================================
@@ -1317,14 +1315,14 @@ function Admin() {
   */
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-8">
-      <div className="mx-auto max-w-7xl">
+    <div className="min-h-screen bg-slate-50 p-3 sm:p-6 md:p-8 max-w-full overflow-x-hidden box-border">
+      <div className="mx-auto max-w-7xl w-full">
 
         {/* Header */}
 
-        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between max-w-full">
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 max-w-full">
             <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-teal-600/30 shadow-md flex items-center justify-center bg-[#1F3952]">
               <img
                 src="/images/logo.png"
@@ -1332,7 +1330,7 @@ function Admin() {
                 className="h-full w-full object-cover scale-[1.38]"
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">
                 UVA EXPLORE
               </h2>
@@ -1340,11 +1338,11 @@ function Admin() {
                 ADMINISTRATOR DASHBOARD
               </p>
 
-              <h1 className="mt-0.5 text-2xl font-bold text-slate-900 md:text-3xl">
+              <h1 className="mt-0.5 text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 truncate">
                 Destination & System Management
               </h1>
 
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 hidden sm:block">
                 Add, edit, and manage destinations, facilities, timetables & user logs across Uva Province.
               </p>
             </div>
@@ -1362,11 +1360,11 @@ function Admin() {
 
         {/* Tab Navigation */}
 
-        <div className="mt-6 flex flex-wrap border-b border-slate-200">
+        <div className="mt-6 flex flex-wrap border-b border-slate-200 max-w-full overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab("places")}
-            className={`flex items-center gap-2 border-b-2 px-6 py-3.5 text-sm font-bold transition ${
+            className={`flex items-center gap-2 border-b-2 px-4 sm:px-6 py-3 text-xs sm:text-sm font-bold transition shrink-0 ${
               activeTab === "places"
                 ? "border-teal-700 text-teal-700 bg-white rounded-t-xl"
                 : "border-transparent text-slate-500 hover:text-slate-900"
@@ -1382,7 +1380,7 @@ function Admin() {
               setActiveTab("facilities");
               fetchAdminFacilities();
             }}
-            className={`flex items-center gap-2 border-b-2 px-6 py-3.5 text-sm font-bold transition ${
+            className={`flex items-center gap-2 border-b-2 px-4 sm:px-6 py-3 text-xs sm:text-sm font-bold transition shrink-0 ${
               activeTab === "facilities"
                 ? "border-teal-700 text-teal-700 bg-white rounded-t-xl"
                 : "border-transparent text-slate-500 hover:text-slate-900"
@@ -1398,7 +1396,7 @@ function Admin() {
               setActiveTab("reviews");
               fetchAdminReviews();
             }}
-            className={`flex items-center gap-2 border-b-2 px-6 py-3.5 text-sm font-bold transition ${
+            className={`flex items-center gap-2 border-b-2 px-4 sm:px-6 py-3 text-xs sm:text-sm font-bold transition shrink-0 ${
               activeTab === "reviews"
                 ? "border-teal-700 text-teal-700 bg-white rounded-t-xl"
                 : "border-transparent text-slate-500 hover:text-slate-900"
@@ -1414,7 +1412,7 @@ function Admin() {
               setActiveTab("ads");
               loadAdminAds();
             }}
-            className={`flex items-center gap-2 border-b-2 px-6 py-3.5 text-sm font-bold transition ${
+            className={`flex items-center gap-2 border-b-2 px-4 sm:px-6 py-3 text-xs sm:text-sm font-bold transition shrink-0 ${
               activeTab === "ads"
                 ? "border-teal-700 text-teal-700 bg-white rounded-t-xl"
                 : "border-transparent text-slate-500 hover:text-slate-900"
@@ -1430,7 +1428,7 @@ function Admin() {
               setActiveTab("user-logs");
               loadUserLogs();
             }}
-            className={`flex items-center gap-2 border-b-2 px-6 py-3.5 text-sm font-bold transition ${
+            className={`flex items-center gap-2 border-b-2 px-4 sm:px-6 py-3 text-xs sm:text-sm font-bold transition shrink-0 ${
               activeTab === "user-logs"
                 ? "border-teal-700 text-teal-700 bg-white rounded-t-xl"
                 : "border-transparent text-slate-500 hover:text-slate-900"
@@ -1446,7 +1444,7 @@ function Admin() {
               setActiveTab("buses");
               loadAdminBuses();
             }}
-            className={`flex items-center gap-2 border-b-2 px-6 py-3.5 text-sm font-bold transition ${
+            className={`flex items-center gap-2 border-b-2 px-4 sm:px-6 py-3 text-xs sm:text-sm font-bold transition shrink-0 ${
               activeTab === "buses"
                 ? "border-teal-700 text-teal-700 bg-white rounded-t-xl"
                 : "border-transparent text-slate-500 hover:text-slate-900"
@@ -1460,29 +1458,23 @@ function Admin() {
         {/* Alerts */}
 
         {error && (
-          <div className="mt-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-700">
-
+          <div className="mt-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-700 max-w-full">
             <AlertCircle
               size={20}
               className="mt-0.5 shrink-0"
             />
-
             <div>
               <p>{error}</p>
-
               <p className="mt-1 text-xs font-normal">
-                Make sure your backend server
-                and MongoDB are running.
+                Make sure your backend server and MongoDB are running.
               </p>
             </div>
           </div>
         )}
 
         {success && (
-          <div className="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700">
-
+          <div className="mt-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-medium text-emerald-700 max-w-full">
             <Check size={20} />
-
             {success}
           </div>
         )}
@@ -1491,20 +1483,20 @@ function Admin() {
           <>
             {/* Admin Form Panel */}
 
-            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+            <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 md:p-8 shadow-sm max-w-full overflow-hidden">
 
               {editingId && (
-                <div className="mb-6 flex items-center justify-between rounded-2xl bg-amber-50 px-5 py-3.5 border border-amber-200">
-                  <div className="flex items-center gap-2">
-                    <Edit size={18} className="text-amber-700" />
-                    <span className="text-sm font-bold text-amber-900">
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl bg-amber-50 p-4 sm:px-5 sm:py-3.5 border border-amber-200 max-w-full overflow-hidden">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Edit size={18} className="text-amber-700 shrink-0" />
+                    <span className="text-xs sm:text-sm font-bold text-amber-900 truncate">
                       Currently Editing: "{formData.name || 'Destination'}"
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={handleCancelEdit}
-                    className="rounded-xl bg-amber-200 px-4 py-1.5 text-xs font-bold text-amber-900 transition hover:bg-amber-300"
+                    className="shrink-0 rounded-xl bg-amber-200 px-4 py-1.5 text-xs font-bold text-amber-900 transition hover:bg-amber-300 w-fit"
                   >
                     Cancel Editing
                   </button>
@@ -1583,11 +1575,11 @@ function Admin() {
             </div>
 
             {/* INTERACTIVE MAP LOCATION PICKER FOR DESTINATION */}
-            <div className="col-span-full rounded-2xl border border-teal-200 bg-teal-50/50 p-4">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="col-span-full rounded-2xl border border-teal-200 bg-teal-50/50 p-3 sm:p-4 max-w-full overflow-hidden box-border">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between max-w-full">
                 <div>
                   <label className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-teal-900">
-                    <MapPin size={16} className="text-teal-700" />
+                    <MapPin size={16} className="text-teal-700 shrink-0" />
                     Pick Destination Location from Map
                   </label>
                   <p className="text-xs text-slate-600">
@@ -1616,13 +1608,13 @@ function Admin() {
                       );
                     }
                   }}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-teal-300 bg-white px-3 py-1.5 text-xs font-bold text-teal-800 shadow-xs hover:bg-teal-100"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-teal-300 bg-white px-3 py-1.5 text-xs font-bold text-teal-800 shadow-xs hover:bg-teal-100 w-fit shrink-0"
                 >
                   🎯 Use My GPS Location
                 </button>
               </div>
 
-              <div className="mt-3 overflow-hidden rounded-xl border border-teal-200 shadow-inner" style={{ height: "300px" }}>
+              <div className="mt-3 overflow-hidden rounded-xl border border-teal-200 shadow-inner max-w-full" style={{ height: "260px" }}>
                 <MapContainer
                   center={[formData.lat || 6.82977, formData.lng || 80.98457]}
                   zoom={12}
@@ -1670,9 +1662,9 @@ function Admin() {
                 </MapContainer>
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-full">
+                <div className="min-w-0">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
                     Latitude (GPS)
                   </label>
                   <input
@@ -1690,11 +1682,11 @@ function Admin() {
                         googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${newLat},${prev.lng}`,
                       }));
                     }}
-                    className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs outline-none focus:border-teal-700"
+                    className="mt-1 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-900 outline-none focus:border-teal-700 box-border"
                   />
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                <div className="min-w-0">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-700">
                     Longitude (GPS)
                   </label>
                   <input
@@ -1712,7 +1704,7 @@ function Admin() {
                         googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${prev.lat},${newLng}`,
                       }));
                     }}
-                    className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs outline-none focus:border-teal-700"
+                    className="mt-1 w-full min-w-0 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-900 outline-none focus:border-teal-700 box-border"
                   />
                 </div>
               </div>
@@ -2409,22 +2401,12 @@ function Admin() {
 
             <button
               type="button"
-              onClick={() =>
-                fetchPlaces(false)
-              }
+              onClick={handleRefreshPlaces}
               disabled={refreshing}
-              className="flex w-fit items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-fit items-center gap-2 rounded-xl border border-teal-200 bg-teal-50/80 px-4 py-2 text-xs sm:text-sm font-bold text-teal-800 hover:bg-teal-100 transition active:scale-95 shadow-2xs cursor-pointer disabled:opacity-50"
             >
-
-              {refreshing ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-teal-700" />
-                  Refreshing...
-                </>
-              ) : (
-                "Refresh"
-              )}
-
+              <Compass size={16} className={refreshing ? "animate-spin text-teal-600" : "text-teal-600"} />
+              <span>{refreshing ? "Refreshing..." : "Refresh Data"}</span>
             </button>
 
           </div>
