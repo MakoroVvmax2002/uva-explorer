@@ -929,6 +929,18 @@ const FALLBACK_PLACES_MAP = {
     setCurrentImage(index);
   }
 
+  useEffect(() => {
+    if (!uniqueGalleryImages || uniqueGalleryImages.length <= 1) return;
+    const nextIdx = (currentImage + 1) % uniqueGalleryImages.length;
+    const prevIdx = (currentImage - 1 + uniqueGalleryImages.length) % uniqueGalleryImages.length;
+    [uniqueGalleryImages[nextIdx], uniqueGalleryImages[prevIdx]].forEach((url) => {
+      if (url) {
+        const img = new Image();
+        img.src = url;
+      }
+    });
+  }, [currentImage, uniqueGalleryImages]);
+
   /* =======================================================
      SAVE
   ======================================================= */
@@ -948,18 +960,23 @@ const FALLBACK_PLACES_MAP = {
   ======================================================= */
 
   function handleAddToTrip() {
-    if (!place) return;
     try {
-      sessionStorage.setItem(
-        "pendingPlaceForPlanner",
-        JSON.stringify({
-          _id: id,
-          name: place.name,
-          location: place.location,
-        })
-      );
-    } catch {}
-    navigate("/planner");
+      const activePlannerJson = localStorage.getItem("uva_active_planner_state");
+      if (activePlannerJson) {
+        const activeState = JSON.parse(activePlannerJson);
+        const existingPlaces = Array.isArray(activeState.places) ? activeState.places : [];
+
+        const isAlreadyAdded = existingPlaces.some((p) => (p._id || p.id) === (place._id || place.id) || p.name === place.name);
+        if (!isAlreadyAdded) {
+          activeState.places = [...existingPlaces, place];
+          localStorage.setItem("uva_active_planner_state", JSON.stringify(activeState));
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to append place to active trip:", e);
+    }
+
+    navigate(`/planner?add=${encodeURIComponent(id)}`);
   }
 
   // Determine map coordinates from location name
@@ -970,12 +987,10 @@ const FALLBACK_PLACES_MAP = {
     UVA_CENTER;
 
   return (
-    <div className="min-h-full bg-slate-50">
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div className="min-h-full bg-slate-50 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
 
-        {/* =================================================
-            BACK
-        ================================================= */}
+        {/* BACK LINK */}
 
         <div className="mb-5">
           <Link
@@ -1000,6 +1015,9 @@ const FALLBACK_PLACES_MAP = {
               <img
                 src={currentImageUrl}
                 alt={`${place.name} image ${currentImage + 1}`}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
                 className="pointer-events-none h-full w-full object-cover"
                 onError={(event) => {
                   console.error(
