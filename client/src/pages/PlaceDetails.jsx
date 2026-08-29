@@ -804,6 +804,36 @@ const FALLBACK_PLACES_MAP = {
   };
 
   /* =======================================================
+     GALLERY DATA & PREFETCH EFFECT (BEFORE EARLY RETURNS)
+  ======================================================= */
+
+  let rawImages = [];
+  if (place && Array.isArray(place.images)) {
+    rawImages = place.images;
+  }
+  if (place && rawImages.length === 0 && place.image) {
+    rawImages = [place.image];
+  }
+
+  const galleryImages = rawImages
+    .map((image) => getImageUrl(image))
+    .filter(Boolean);
+
+  const uniqueGalleryImages = [...new Set(galleryImages)];
+
+  useEffect(() => {
+    if (!uniqueGalleryImages || uniqueGalleryImages.length <= 1) return;
+    const nextIdx = (currentImage + 1) % uniqueGalleryImages.length;
+    const prevIdx = (currentImage - 1 + uniqueGalleryImages.length) % uniqueGalleryImages.length;
+    [uniqueGalleryImages[nextIdx], uniqueGalleryImages[prevIdx]].forEach((url) => {
+      if (url) {
+        const img = new Image();
+        img.src = url;
+      }
+    });
+  }, [currentImage, uniqueGalleryImages]);
+
+  /* =======================================================
      LOADING
   ======================================================= */
 
@@ -857,30 +887,6 @@ const FALLBACK_PLACES_MAP = {
     );
   }
 
-  /* =======================================================
-     GALLERY DATA
-  ======================================================= */
-
-  let rawImages = [];
-
-  if (Array.isArray(place.images)) {
-    rawImages = place.images;
-  }
-
-  // If images[] is empty, use image
-  if (rawImages.length === 0 && place.image) {
-    rawImages = [place.image];
-  }
-
-  const galleryImages = rawImages
-    .map((image) => getImageUrl(image))
-    .filter(Boolean);
-
-  /*
-    Remove duplicate image URLs
-  */
-  const uniqueGalleryImages = [...new Set(galleryImages)];
-
   const currentImageUrl =
     uniqueGalleryImages[currentImage] || "";
 
@@ -919,18 +925,6 @@ const FALLBACK_PLACES_MAP = {
   function selectImage(index) {
     setCurrentImage(index);
   }
-
-  useEffect(() => {
-    if (!uniqueGalleryImages || uniqueGalleryImages.length <= 1) return;
-    const nextIdx = (currentImage + 1) % uniqueGalleryImages.length;
-    const prevIdx = (currentImage - 1 + uniqueGalleryImages.length) % uniqueGalleryImages.length;
-    [uniqueGalleryImages[nextIdx], uniqueGalleryImages[prevIdx]].forEach((url) => {
-      if (url) {
-        const img = new Image();
-        img.src = url;
-      }
-    });
-  }, [currentImage, uniqueGalleryImages]);
 
   /* =======================================================
      SAVE
