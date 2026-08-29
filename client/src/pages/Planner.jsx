@@ -32,10 +32,12 @@ import {
   Volume2,
   VolumeX,
   AlertTriangle,
-  Play,
   Square,
   Locate,
   Crosshair,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 // DEFAULT MAP CENTER: Bandarawela Central Hub, Uva Province
@@ -947,6 +949,7 @@ function Planner() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [maxDistance, setMaxDistance] = useState(50); // 5km to 50km (50 = Any)
   const [showStyleMenu, setShowStyleMenu] = useState(false);
+  const [showCategoryMenu, setShowCategoryMenu] = useState(false);
 
   // TRAVEL MODE & MULTI-STOP ROUTING STATE
   const [travelMode, setTravelMode] = useState("driving"); // "driving", "motorbike", "biking", "walking"
@@ -1526,26 +1529,50 @@ function Planner() {
           )}
         </div>
 
-        {/* CATEGORY FILTER CHIPS BAR */}
-        <div className="hidden sm:flex items-center gap-1 rounded-full bg-slate-900/90 p-1.5 shadow-2xl backdrop-blur-md border border-slate-700 text-xs font-bold">
-          {[
-            { id: "all", label: "All", icon: "📍" },
-            { id: "place", label: "Places", icon: "🌿" },
-            { id: "hotel", label: "Hotels", icon: "🏨" },
-            { id: "hospital", label: "Medical", icon: "🏥" },
-            { id: "fuel", label: "Fuel", icon: "⛽" },
-            { id: "transport", label: "Stands", icon: "🚌" },
-          ].map((cat) => (
+        {/* COLLAPSIBLE CATEGORY FILTER CHIPS BAR */}
+        <div className="flex items-center">
+          {showCategoryMenu ? (
+            <div className="flex items-center gap-1 rounded-full bg-slate-900/95 p-1.5 shadow-2xl backdrop-blur-xl border border-slate-700 text-xs font-bold animate-in fade-in slide-in-from-right duration-200">
+              {[
+                { id: "all", label: "All", icon: "📍" },
+                { id: "place", label: "Places", icon: "🌿" },
+                { id: "hotel", label: "Hotels", icon: "🏨" },
+                { id: "hospital", label: "Medical", icon: "🏥" },
+                { id: "fuel", label: "Fuel", icon: "⛽" },
+                { id: "transport", label: "Stands", icon: "🚌" },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setCategoryFilter(cat.id)}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold transition ${categoryFilter === cat.id ? "bg-teal-600 text-white shadow-xs" : "text-slate-300 hover:bg-slate-800"}`}
+                >
+                  <span>{cat.icon}</span>
+                  <span>{cat.label}</span>
+                </button>
+              ))}
+
+              <button
+                type="button"
+                onClick={() => setShowCategoryMenu(false)}
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-800 text-slate-300 hover:bg-rose-900/50 hover:text-rose-300 transition ml-1 cursor-pointer border border-slate-700"
+                title="Hide Filters"
+              >
+                <ChevronRight size={15} />
+              </button>
+            </div>
+          ) : (
             <button
-              key={cat.id}
               type="button"
-              onClick={() => setCategoryFilter(cat.id)}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold transition ${categoryFilter === cat.id ? "bg-teal-600 text-white shadow-xs" : "text-slate-300 hover:bg-slate-800"}`}
+              onClick={() => setShowCategoryMenu(true)}
+              className="flex items-center gap-2 rounded-full bg-slate-900/90 text-white hover:bg-slate-800 px-3.5 py-2 shadow-2xl backdrop-blur-md border border-slate-700 text-xs font-extrabold transition active:scale-95 cursor-pointer group"
+              title="Click to Expand Category Filters"
             >
-              <span>{cat.icon}</span>
-              <span>{cat.label}</span>
+              <Filter size={14} className="text-teal-400 group-hover:rotate-12 transition transform" />
+              <span>Filter Places ({categoryFilter === "all" ? "All" : categoryFilter})</span>
+              <ChevronLeft size={15} className="text-slate-400 group-hover:-translate-x-0.5 transition transform" />
             </button>
-          ))}
+          )}
         </div>
       </div>
 
