@@ -43,17 +43,10 @@ const DEFAULT_CENTER = [6.82977, 80.98457];
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY || "";
 
-// High-Definition Professional Map Tile Layer Configurations (MapTiler Cloud + ESRI Fallback)
+// MapTiler Cloud Tile Layer Configurations (Streets-v4 & Hybrid-v4)
 const MAP_TILE_CONFIGS = {
-  maptiler_hybrid: {
-    url: MAPTILER_KEY
-      ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`
-      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    subdomains: [],
-    maxZoom: 20,
-    attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  },
   maptiler_streets: {
+    name: "Streets Map (v4)",
     url: MAPTILER_KEY
       ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
       : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
@@ -61,29 +54,14 @@ const MAP_TILE_CONFIGS = {
     maxZoom: 20,
     attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   },
-  voyager: {
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+  maptiler_hybrid: {
+    name: "Satellite Map (Hybrid-v4)",
+    url: MAPTILER_KEY
+      ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     subdomains: [],
-    maxZoom: 19,
-    attribution: '&copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community',
-  },
-  satellite: {
-    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    subdomains: [],
-    maxZoom: 19,
-    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
-  },
-  vibrant: {
-    url: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-    subdomains: "abc",
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, Tiles by <a href="https://www.hotosm.org/">HOT</a>',
-  },
-  osm: {
-    url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    subdomains: "abc",
-    maxZoom: 19,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   },
 };
 
@@ -916,7 +894,7 @@ function Planner() {
   const [customPoint, setCustomPoint] = useState(null);
 
   // MAP ENGINE STYLE & CATEGORY FILTER STATE
-  const [mapStyle, setMapStyle] = useState("voyager"); // "voyager", "satellite", "dark", "osm"
+  const [mapStyle, setMapStyle] = useState("maptiler_streets"); // "maptiler_streets" or "maptiler_hybrid"
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [maxDistance, setMaxDistance] = useState(50); // 5km to 50km (50 = Any)
   const [showStyleMenu, setShowStyleMenu] = useState(false);
@@ -1450,59 +1428,33 @@ function Planner() {
         </div>
       )}
 
-      {/* TOP-RIGHT FLOATING MAP CONTROLS & STYLE SWITCHER */}
+      {/* TOP-RIGHT FLOATING MAP CONTROLS & MAPTILER TOGGLE BUTTON */}
       <div className="absolute top-4 right-4 z-[1000] flex flex-col items-end gap-2">
-        {/* MAP STYLE PICKER BUTTON */}
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => setShowStyleMenu(!showStyleMenu)}
-            className="flex items-center gap-2 rounded-full bg-slate-900/90 text-white hover:bg-slate-800 px-3.5 py-2 shadow-2xl backdrop-blur-md border border-slate-700 text-xs font-extrabold transition active:scale-95 cursor-pointer"
-          >
-            <Compass size={15} className="text-teal-400" />
-            <span className="capitalize">{mapStyle}</span>
-            <span className="text-[10px] bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-500/30">
-              {mapStyle === "voyager" ? "🗺️ ESRI Topo" : mapStyle === "satellite" ? "🛰️ 3D Sat" : mapStyle === "vibrant" ? "🎨 HOT Vibrant" : "🌍 Standard"}
-            </span>
-          </button>
-
-          {showStyleMenu && (
-            <div className="absolute right-0 mt-2 w-48 rounded-2xl bg-slate-900/95 p-2 shadow-2xl backdrop-blur-xl border border-slate-700 z-[2000] space-y-1">
-              <button
-                type="button"
-                onClick={() => { setMapStyle("voyager"); setShowStyleMenu(false); }}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "voyager" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
-              >
-                <span>🗺️ ESRI Topo HD</span>
-                {mapStyle === "voyager" && <span>✓</span>}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setMapStyle("satellite"); setShowStyleMenu(false); }}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "satellite" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
-              >
-                <span>🛰️ ESRI 3D Satellite</span>
-                {mapStyle === "satellite" && <span>✓</span>}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setMapStyle("vibrant"); setShowStyleMenu(false); }}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "vibrant" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
-              >
-                <span>🎨 HOT Vibrant Map</span>
-                {mapStyle === "vibrant" && <span>✓</span>}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setMapStyle("osm"); setShowStyleMenu(false); }}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "osm" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
-              >
-                <span>🌍 Standard OSM</span>
-                {mapStyle === "osm" && <span>✓</span>}
-              </button>
-            </div>
+        {/* MAPTILER QUICK TOGGLE BUTTON (Streets-v4 <-> Hybrid-v4) */}
+        <button
+          type="button"
+          onClick={() => setMapStyle(mapStyle === "maptiler_streets" ? "maptiler_hybrid" : "maptiler_streets")}
+          className="flex items-center gap-2 rounded-full bg-slate-900/95 text-white hover:bg-slate-800 px-4 py-2.5 shadow-2xl backdrop-blur-md border border-slate-700 text-xs font-black transition active:scale-95 cursor-pointer group"
+          title="Switch MapTiler Style (Streets-v4 <-> Hybrid-v4)"
+        >
+          {mapStyle === "maptiler_streets" ? (
+            <>
+              <span className="text-amber-400 group-hover:rotate-12 transition transform">🛰️</span>
+              <span>Satellite Map (Hybrid-v4)</span>
+              <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30">
+                MapTiler
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="text-emerald-400 group-hover:-rotate-12 transition transform">🗺️</span>
+              <span>Street Map (Streets-v4)</span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                MapTiler
+              </span>
+            </>
           )}
-        </div>
+        </button>
 
         {/* CATEGORY FILTER CHIPS BAR */}
         <div className="hidden sm:flex items-center gap-1 rounded-full bg-slate-900/90 p-1.5 shadow-2xl backdrop-blur-md border border-slate-700 text-xs font-bold">
