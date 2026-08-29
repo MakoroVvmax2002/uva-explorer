@@ -71,9 +71,9 @@ const HERO_CAROUSEL_IMAGES = [
 ];
 
 export default function Home() {
-  const [places, setPlaces] = useState([]);
+  const [places, setPlaces] = useState(staticPlaces);
   const [allReviews, setAllReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [savedIds, setSavedIds] = useState([]);
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
 
@@ -104,17 +104,23 @@ export default function Home() {
 
   // Fetch places and app user reviews
   useEffect(() => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
     const loadData = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/places`);
+        const res = await fetch(`${API_URL}/api/places`, { signal: controller.signal });
         if (res.ok) {
           const data = await res.json();
           const list = Array.isArray(data) ? data : Array.isArray(data?.places) ? data.places : [];
-          setPlaces(list);
+          if (list.length > 0) {
+            setPlaces(list);
+          }
         }
       } catch (err) {
-        console.warn("Failed to fetch places from API:", err);
+        // Silently use static pre-hydrated places fallback
       } finally {
+        clearTimeout(timeoutId);
         setLoading(false);
       }
 

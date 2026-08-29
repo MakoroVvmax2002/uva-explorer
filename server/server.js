@@ -17,22 +17,34 @@ app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ limit: "20mb", extended: true }));
 
-// MongoDB connection handler (cached for serverless deployment)
-let isConnected = false;
+// MongoDB connection handler (cached for ultra-fast serverless execution)
+let cached = global.mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
 async function connectDB() {
-  if (isConnected || mongoose.connection.readyState === 1) {
-    isConnected = true;
-    return;
+  if (cached.conn && mongoose.connection.readyState === 1) {
+    return cached.conn;
   }
+
+  if (!cached.promise && process.env.MONGO_URI) {
+    const opts = {
+      bufferCommands: false,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 30000,
+    };
+    cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((m) => m);
+  }
+
   try {
-    if (process.env.MONGO_URI) {
-      await mongoose.connect(process.env.MONGO_URI);
-      isConnected = true;
-      console.log("MongoDB connected successfully");
-    }
+    cached.conn = await cached.promise;
   } catch (error) {
+    cached.promise = null;
     console.error("MongoDB connection error:", error.message);
   }
+  return cached.conn;
 }
 
 app.use(async (req, res, next) => {

@@ -2,11 +2,12 @@ import { API_URL } from "./api";
 
 const LOGS_STORAGE_KEY = "uva_user_activity_logs";
 
-export async function logUserActivity({ userName, location }) {
+export function logUserActivity({ userName, location }) {
   if (!userName || !userName.trim()) return null;
 
   const now = new Date();
   const dateStr = now.toLocaleDateString("en-GB"); // DD/MM/YYYY
+  const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
   const userLocation =
     location && (location.startsWith("http://") || location.startsWith("https://"))
       ? location
@@ -21,7 +22,7 @@ export async function logUserActivity({ userName, location }) {
     createdAt: now.toISOString(),
   };
 
-  // 1. Save to local storage for offline fallback
+  // 1. Save to local storage instantly
   try {
     const existing = JSON.parse(localStorage.getItem(LOGS_STORAGE_KEY) || "[]");
     localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify([logEntry, ...existing]));
@@ -29,24 +30,19 @@ export async function logUserActivity({ userName, location }) {
     console.warn("Local user log storage warning:", e);
   }
 
-  // 2. Send to backend Express server to append to Excel file
-  try {
-    const response = await fetch(`${API_URL}/api/user-logs/log`, {
+  // 2. Fire and forget to backend in non-blocking background microtask
+  setTimeout(() => {
+    fetch(`${API_URL}/api/user-logs/log`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         userName: userName.trim(),
         location: userLocation,
       }),
+    }).catch((err) => {
+      console.warn("Backend user log background sync offline:", err);
     });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data;
-    }
-  } catch (err) {
-    console.warn("Backend user log API offline, saved locally:", err);
-  }
+  }, 0);
 
   return logEntry;
 }

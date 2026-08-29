@@ -41,7 +41,7 @@ const DEFAULT_SETTINGS = {
 
 function Explore() {
   const [searchParams] = useSearchParams();
-  const [places, setPlaces] = useState([]);
+  const [places, setPlaces] = useState(DEFAULT_CURATED_PLACES);
 
   // Read ?q= and ?category= from URL (set by Home category cards or Navbar search)
   const [search, setSearch] = useState(() => searchParams.get("q") || "");
@@ -69,7 +69,7 @@ function Explore() {
   const [settings, setSettings] =
     useState(DEFAULT_SETTINGS);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState("");
 
@@ -208,8 +208,11 @@ const DEFAULT_CURATED_PLACES = [
 ];
 
   const fetchPlaces = async (
-    showFullLoading = true
+    showFullLoading = false
   ) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
     try {
       if (showFullLoading) {
         setLoading(true);
@@ -223,7 +226,7 @@ const DEFAULT_CURATED_PLACES = [
         `${API_URL}/api/places`,
         {
           method: "GET",
-          cache: "no-store",
+          signal: controller.signal,
           headers: {
             Accept: "application/json",
           },
@@ -246,21 +249,18 @@ const DEFAULT_CURATED_PLACES = [
 
       if (placesData.length > 0) {
         setPlaces(placesData);
-      } else {
-        setPlaces(DEFAULT_CURATED_PLACES);
       }
     } catch (err) {
-      console.warn("API fetch error, displaying curated fallback places:", err);
-      setPlaces(DEFAULT_CURATED_PLACES);
-      setError("");
+      // Silently keep curated places
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
       setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchPlaces();
+    fetchPlaces(false);
   }, []);
 
   // Extract available categories
