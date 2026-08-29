@@ -565,10 +565,39 @@ const FALLBACK_PLACES_MAP = {
         if (loadedPlace) {
           const placeName = loadedPlace.name || matchedFallback?.name || "";
           const phoneFromMap = PLACE_CONTACT_NUMBERS[placeName] || matchedFallback?.phone;
-          
+
+          // Smart Image Merging: Always prioritize and preserve the rich multi-photo array
+          let mergedImages = [];
+          const fallbackImgs = Array.isArray(matchedFallback?.images) ? matchedFallback.images : [];
+          const loadedImgs = Array.isArray(loadedPlace?.images) ? loadedPlace.images : [];
+
+          if (fallbackImgs.length >= loadedImgs.length && fallbackImgs.length > 1) {
+            mergedImages = [...fallbackImgs];
+            loadedImgs.forEach((img) => {
+              if (img && typeof img === "string" && !mergedImages.includes(img)) {
+                mergedImages.push(img);
+              }
+            });
+          } else {
+            mergedImages = [...loadedImgs];
+            fallbackImgs.forEach((img) => {
+              if (img && typeof img === "string" && !mergedImages.includes(img)) {
+                mergedImages.push(img);
+              }
+            });
+          }
+
+          if (mergedImages.length === 0) {
+            if (loadedPlace.image) mergedImages.push(loadedPlace.image);
+            if (matchedFallback?.image && !mergedImages.includes(matchedFallback.image)) {
+              mergedImages.push(matchedFallback.image);
+            }
+          }
+
           loadedPlace = {
             ...matchedFallback,
             ...loadedPlace,
+            images: mergedImages,
             phone: (phoneFromMap && phoneFromMap !== "N/A") ? phoneFromMap : (loadedPlace.phone || matchedFallback?.phone || "N/A"),
             location: (matchedFallback?.location && matchedFallback.location.length > 20) ? matchedFallback.location : loadedPlace.location,
             lat: matchedFallback?.lat || loadedPlace.lat,
