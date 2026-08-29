@@ -363,20 +363,24 @@ export const FACILITIES_DATA = {
  * Returns structured facilities data for ANY given place.
  */
 export function getPlaceFacilities(placeName, category = "", customFacilities = null) {
-  if (customFacilities && (
-    (customFacilities.parking && customFacilities.parking.length > 0) ||
-    (customFacilities.transport && customFacilities.transport.length > 0) ||
-    (customFacilities.foodBeverage && customFacilities.foodBeverage.length > 0) ||
-    (customFacilities.utilities && customFacilities.utilities.length > 0) ||
-    (customFacilities.other && customFacilities.other.length > 0)
-  )) {
-    return {
-      parking: customFacilities.parking || [],
-      transport: customFacilities.transport || [],
-      foodBeverage: customFacilities.foodBeverage || [],
-      utilities: customFacilities.utilities || [],
-      other: customFacilities.other || [],
-    };
+  if (customFacilities && typeof customFacilities === "object") {
+    const ensureArray = (val) => (Array.isArray(val) ? val : []);
+    const hasAny =
+      (Array.isArray(customFacilities.parking) && customFacilities.parking.length > 0) ||
+      (Array.isArray(customFacilities.transport) && customFacilities.transport.length > 0) ||
+      (Array.isArray(customFacilities.foodBeverage) && customFacilities.foodBeverage.length > 0) ||
+      (Array.isArray(customFacilities.utilities) && customFacilities.utilities.length > 0) ||
+      (Array.isArray(customFacilities.other) && customFacilities.other.length > 0);
+
+    if (hasAny) {
+      return {
+        parking: ensureArray(customFacilities.parking),
+        transport: ensureArray(customFacilities.transport),
+        foodBeverage: ensureArray(customFacilities.foodBeverage),
+        utilities: ensureArray(customFacilities.utilities),
+        other: ensureArray(customFacilities.other),
+      };
+    }
   }
 
   if (!placeName || typeof placeName !== "string") {

@@ -1489,19 +1489,19 @@ const FALLBACK_PLACES_MAP = {
                         <span>Parking Facilities</span>
                       </div>
                       <div className="space-y-2.5">
-                        {facilities.parking.map((item, i) => (
+                        {Array.isArray(facilities?.parking) && facilities.parking.map((item, i) => (
                           <div key={i} className="rounded-xl bg-white p-3 border border-slate-200/70 shadow-2xs dark:bg-slate-800/70 dark:border-slate-700">
                             <div className="flex items-start gap-2.5">
                               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-100/90 text-teal-800 dark:bg-teal-950/80 dark:text-teal-300 border border-teal-200/80 dark:border-teal-800/60 mt-0.5 shadow-2xs">
-                                {getFacilityItemIcon(item.text)}
+                                {getFacilityItemIcon(item?.text || "")}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
-                                  {item.text}
+                                  {item?.text}
                                 </p>
                                 <div className="mt-2">
                                   <span className="inline-block rounded-md bg-teal-50 px-2 py-0.5 text-[10px] font-extrabold text-teal-800 border border-teal-200/80 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800">
-                                    {item.status}
+                                    {item?.status}
                                   </span>
                                 </div>
                               </div>
@@ -1518,19 +1518,19 @@ const FALLBACK_PLACES_MAP = {
                         <span>Transport & Access</span>
                       </div>
                       <div className="space-y-2.5">
-                        {facilities.transport.map((item, i) => (
+                        {Array.isArray(facilities?.transport) && facilities.transport.map((item, i) => (
                           <div key={i} className="rounded-xl bg-white p-3 border border-slate-200/70 shadow-2xs dark:bg-slate-800/70 dark:border-slate-700">
                             <div className="flex items-start gap-2.5">
                               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-100/90 text-teal-800 dark:bg-teal-950/80 dark:text-teal-300 border border-teal-200/80 dark:border-teal-800/60 mt-0.5 shadow-2xs">
-                                {getFacilityItemIcon(item.text)}
+                                {getFacilityItemIcon(item?.text || "")}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
-                                  {item.text}
+                                  {item?.text}
                                 </p>
                                 <div className="mt-2">
                                   <span className="inline-block rounded-md bg-teal-50 px-2 py-0.5 text-[10px] font-extrabold text-teal-800 border border-teal-200/80 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800">
-                                    {item.status}
+                                    {item?.status}
                                   </span>
                                 </div>
                               </div>
@@ -1547,19 +1547,19 @@ const FALLBACK_PLACES_MAP = {
                         <span>Food & Beverages</span>
                       </div>
                       <div className="space-y-2.5">
-                        {facilities.foodBeverage.map((item, i) => (
+                        {Array.isArray(facilities?.foodBeverage) && facilities.foodBeverage.map((item, i) => (
                           <div key={i} className="rounded-xl bg-white p-3 border border-slate-200/70 shadow-2xs dark:bg-slate-800/70 dark:border-slate-700">
                             <div className="flex items-start gap-2.5">
                               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-100/90 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/60 mt-0.5 shadow-2xs">
-                                {getFacilityItemIcon(item.text)}
+                                {getFacilityItemIcon(item?.text || "")}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
-                                  {item.text}
+                                  {item?.text}
                                 </p>
                                 <div className="mt-2">
                                   <span className="inline-block rounded-md bg-amber-50 px-2 py-0.5 text-[10px] font-extrabold text-amber-800 border border-amber-200/80 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800">
-                                    {item.status}
+                                    {item?.status}
                                   </span>
                                 </div>
                               </div>
@@ -1576,19 +1576,19 @@ const FALLBACK_PLACES_MAP = {
                         <span>Utilities & Comfort</span>
                       </div>
                       <div className="space-y-2.5">
-                        {facilities.utilities.map((item, i) => (
+                        {Array.isArray(facilities?.utilities) && facilities.utilities.map((item, i) => (
                           <div key={i} className="rounded-xl bg-white p-3 border border-slate-200/70 shadow-2xs dark:bg-slate-800/70 dark:border-slate-700">
                             <div className="flex items-start gap-2.5">
                               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-100/90 text-sky-800 dark:bg-sky-950/80 dark:text-sky-300 border border-sky-200/80 dark:border-sky-800/60 mt-0.5 shadow-2xs">
-                                {getFacilityItemIcon(item.text)}
+                                {getFacilityItemIcon(item?.text || "")}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
-                                  {item.text}
+                                  {item?.text}
                                 </p>
                                 <div className="mt-2">
                                   <span className="inline-block rounded-md bg-sky-50 px-2 py-0.5 text-[10px] font-extrabold text-sky-800 border border-sky-200/80 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800">
-                                    {item.status}
+                                    {item?.status}
                                   </span>
                                 </div>
                               </div>
@@ -1605,19 +1605,19 @@ const FALLBACK_PLACES_MAP = {
                         <span>Highlights & Special Features</span>
                       </div>
                       <div className="grid gap-2.5 sm:grid-cols-2">
-                        {facilities.other.map((item, i) => (
+                        {Array.isArray(facilities?.other) && facilities.other.map((item, i) => (
                           <div key={i} className="rounded-xl bg-white p-3 border border-slate-200/70 shadow-2xs dark:bg-slate-800/70 dark:border-slate-700">
                             <div className="flex items-start gap-2.5">
                               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100/90 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60 mt-0.5 shadow-2xs">
-                                {getFacilityItemIcon(item.text)}
+                                {getFacilityItemIcon(item?.text || "")}
                               </span>
                               <div className="flex-1 min-w-0">
                                 <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 leading-relaxed">
-                                  {item.text}
+                                  {item?.text}
                                 </p>
                                 <div className="mt-2">
                                   <span className="inline-block rounded-md bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800 border border-emerald-200/80 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800">
-                                    {item.status}
+                                    {item?.status}
                                   </span>
                                 </div>
                               </div>
