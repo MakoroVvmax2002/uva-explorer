@@ -118,11 +118,13 @@ function App() {
 
         {/* Main content */}
         <div className="flex min-w-0 flex-1 flex-col relative z-0">
-          <Navbar
-            onMenuClick={() => setSidebarOpen((prev) => !prev)}
-            visitorName={visitorName}
-            onChangeNameRequest={() => setShowWelcomeModal(true)}
-          />
+          <div className="relative z-[9999]">
+            <Navbar
+              onMenuClick={() => setSidebarOpen((prev) => !prev)}
+              visitorName={visitorName}
+              onChangeNameRequest={() => setShowWelcomeModal(true)}
+            />
+          </div>
 
           <main className="flex-1 overflow-y-auto relative z-0">
             <Suspense fallback={<PageLoader />}>
