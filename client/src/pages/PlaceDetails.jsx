@@ -106,6 +106,16 @@ const getFacilityLogoIcon = (category) => {
   return getDestPinIcon();
 };
 
+const getFacilityItemIcon = (text = "") => {
+  const t = (text || "").toLowerCase();
+  if (t.includes("park") || t.includes("toll") || t.includes("vehicle") || t.includes("car") || t.includes("bike") || t.includes("motorcycle")) return "🚗";
+  if (t.includes("bus") || t.includes("tuk") || t.includes("road") || t.includes("hike") || t.includes("train") || t.includes("trail") || t.includes("walk") || t.includes("transport")) return "🚌";
+  if (t.includes("tea") || t.includes("cafe") || t.includes("food") || t.includes("fruit") || t.includes("snack") || t.includes("juice") || t.includes("coconut") || t.includes("dine") || t.includes("meal") || t.includes("beverage")) return "☕";
+  if (t.includes("restroom") || t.includes("toilet") || t.includes("bench") || t.includes("wifi") || t.includes("signal") || t.includes("4g") || t.includes("bin") || t.includes("shade") || t.includes("ramp") || t.includes("gazebo")) return "🛈";
+  return "✨";
+};
+
+
 /* =========================================================
    COORDINATE LOOKUP — known Uva Province locations
 ========================================================= */
