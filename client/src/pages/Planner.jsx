@@ -41,13 +41,13 @@ import {
 // DEFAULT MAP CENTER: Bandarawela Central Hub, Uva Province
 const DEFAULT_CENTER = [6.82977, 80.98457];
 
-// High-Definition Professional Map Tile Layer Configurations
+// High-Definition Professional Map Tile Layer Configurations (100% Free & No API Key Required)
 const MAP_TILE_CONFIGS = {
   voyager: {
-    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-    subdomains: "abcd",
-    maxZoom: 20,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+    subdomains: [],
+    maxZoom: 19,
+    attribution: '&copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community',
   },
   satellite: {
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
@@ -55,11 +55,11 @@ const MAP_TILE_CONFIGS = {
     maxZoom: 19,
     attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
   },
-  dark: {
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    subdomains: "abcd",
-    maxZoom: 20,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  vibrant: {
+    url: "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+    subdomains: "abc",
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, Tiles by <a href="https://www.hotosm.org/">HOT</a>',
   },
   osm: {
     url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -1444,7 +1444,7 @@ function Planner() {
             <Compass size={15} className="text-teal-400" />
             <span className="capitalize">{mapStyle}</span>
             <span className="text-[10px] bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-500/30">
-              {mapStyle === "voyager" ? "🗺️ Vector" : mapStyle === "satellite" ? "🛰️ 3D Sat" : mapStyle === "dark" ? "🌙 Dark" : "🌍 Standard"}
+              {mapStyle === "voyager" ? "🗺️ ESRI Topo" : mapStyle === "satellite" ? "🛰️ 3D Sat" : mapStyle === "vibrant" ? "🎨 HOT Vibrant" : "🌍 Standard"}
             </span>
           </button>
 
@@ -1455,7 +1455,7 @@ function Planner() {
                 onClick={() => { setMapStyle("voyager"); setShowStyleMenu(false); }}
                 className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "voyager" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
               >
-                <span>🗺️ Carto Voyager</span>
+                <span>🗺️ ESRI Topo HD</span>
                 {mapStyle === "voyager" && <span>✓</span>}
               </button>
               <button
@@ -1468,11 +1468,11 @@ function Planner() {
               </button>
               <button
                 type="button"
-                onClick={() => { setMapStyle("dark"); setShowStyleMenu(false); }}
-                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "dark" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
+                onClick={() => { setMapStyle("vibrant"); setShowStyleMenu(false); }}
+                className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition ${mapStyle === "vibrant" ? "bg-teal-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
               >
-                <span>🌙 Dark Mode</span>
-                {mapStyle === "dark" && <span>✓</span>}
+                <span>🎨 HOT Vibrant Map</span>
+                {mapStyle === "vibrant" && <span>✓</span>}
               </button>
               <button
                 type="button"
@@ -1736,31 +1736,6 @@ function Planner() {
             </span>
 
             <div className="flex items-center gap-1.5 sm:gap-2">
-              {/* SNAP PRESET BUTTONS FOR QUICK ACCESS */}
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-[10px] font-bold md:hidden">
-                <button
-                  type="button"
-                  onClick={() => setSheetPercent(25)}
-                  className={`px-1.5 py-0.5 rounded transition ${sheetPercent <= 30 ? "bg-teal-700 text-white" : "text-slate-600 dark:text-slate-400"}`}
-                >
-                  25%
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSheetPercent(50)}
-                  className={`px-1.5 py-0.5 rounded transition ${sheetPercent > 30 && sheetPercent <= 65 ? "bg-teal-700 text-white" : "text-slate-600 dark:text-slate-400"}`}
-                >
-                  50%
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSheetPercent(82)}
-                  className={`px-1.5 py-0.5 rounded transition ${sheetPercent > 65 ? "bg-teal-700 text-white" : "text-slate-600 dark:text-slate-400"}`}
-                >
-                  75%
-                </button>
-              </div>
-
               {/* MOBILE TAP MAP BUTTON */}
               <button
                 type="button"
