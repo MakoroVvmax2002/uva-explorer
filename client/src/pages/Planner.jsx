@@ -900,6 +900,7 @@ function Planner() {
   // MAP ENGINE STYLE & CATEGORY FILTER STATE
   const [mapStyle, setMapStyle] = useState("voyager"); // "voyager", "satellite", "dark", "osm"
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [maxDistance, setMaxDistance] = useState(50); // 5km to 50km (50 = Any)
   const [showStyleMenu, setShowStyleMenu] = useState(false);
 
   // TRAVEL MODE & MULTI-STOP ROUTING STATE
@@ -1374,19 +1375,32 @@ function Planner() {
     };
   }, [routeKey]);
 
-  // Filtered map assets based on category filter
+  // Filtered map assets based on category filter and Strava route length distance slider
   const filteredMapAssets = useMemo(() => {
-    if (categoryFilter === "all") return mapAssets;
+    const centerLat = startAsset?.lat || DEFAULT_CENTER[0];
+    const centerLng = startAsset?.lng || DEFAULT_CENTER[1];
+
     return mapAssets.filter((asset) => {
-      if (categoryFilter === "place") return asset.category === "place";
-      if (categoryFilter === "transport") return asset.category === "transport";
-      if (categoryFilter === "hotel") return asset.category === "facility" && asset.iconType === "hotel";
-      if (categoryFilter === "hospital") return asset.category === "facility" && asset.iconType === "hospital";
-      if (categoryFilter === "fuel") return asset.category === "facility" && asset.iconType === "fuel";
-      if (categoryFilter === "police") return asset.category === "facility" && asset.iconType === "police";
+      // 1. Category Filter
+      let matchesCat = true;
+      if (categoryFilter === "place") matchesCat = asset.category === "place";
+      else if (categoryFilter === "transport") matchesCat = asset.category === "transport";
+      else if (categoryFilter === "hotel") matchesCat = asset.category === "facility" && asset.iconType === "hotel";
+      else if (categoryFilter === "hospital") matchesCat = asset.category === "facility" && asset.iconType === "hospital";
+      else if (categoryFilter === "fuel") matchesCat = asset.category === "facility" && asset.iconType === "fuel";
+      else if (categoryFilter === "police") matchesCat = asset.category === "facility" && asset.iconType === "police";
+
+      if (!matchesCat) return false;
+
+      // 2. Strava Distance Filter (Radius from Start / Central Hub)
+      if (maxDistance < 50) {
+        const distKm = getDistanceInMeters(centerLat, centerLng, asset.lat, asset.lng) / 1000;
+        if (distKm > maxDistance) return false;
+      }
+
       return true;
     });
-  }, [mapAssets, categoryFilter]);
+  }, [mapAssets, categoryFilter, maxDistance, startAsset]);
 
   return (
     <div className="relative h-[calc(100vh-64px)] w-full bg-slate-100 dark:bg-slate-950 overflow-hidden">
@@ -1844,6 +1858,66 @@ function Planner() {
                 </p>
               </div>
             )}
+
+            {/* STRAVA: ROUTE LENGTH DISTANCE SLIDER */}
+            <div className="rounded-2xl bg-slate-900 text-white p-3.5 border border-slate-800 shadow-lg space-y-2 select-none">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-orange-600 font-black text-white text-[11px]">
+                    🚴
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-black text-white tracking-wide uppercase">
+                      Strava Route Length Filter
+                    </h4>
+                    <p className="text-[10px] text-slate-400 font-semibold">
+                      {startAsset ? `Radius from ${startAsset.name}` : "Radius from Central Hub"}
+                    </p>
+                  </div>
+                </div>
+
+                <span className="rounded-full bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2.5 py-0.5 text-xs font-black">
+                  {maxDistance >= 50 ? "ANY DISTANCE" : `≤ ${maxDistance} km`}
+                </span>
+              </div>
+
+              {/* STRAVA MINI HISTOGRAM / ELEVATION BARS */}
+              <div className="flex items-end justify-between gap-1 px-1 pt-1 h-5">
+                {[12, 18, 25, 32, 28, 40, 35, 22, 45, 30, 20, 38, 50, 42, 28, 15, 30, 48, 35, 20].map((h, i) => {
+                  const valAtBar = (i / 20) * 50;
+                  const isActive = valAtBar <= maxDistance || maxDistance >= 50;
+                  return (
+                    <div
+                      key={i}
+                      style={{ height: `${h}%` }}
+                      className={`w-full rounded-xs transition-all duration-200 ${
+                        isActive ? "bg-orange-500" : "bg-slate-700/60"
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* STRAVA SLIDER TRACK */}
+              <div className="relative flex items-center">
+                <input
+                  type="range"
+                  min="5"
+                  max="50"
+                  step="2.5"
+                  value={maxDistance}
+                  onChange={(e) => setMaxDistance(Number(e.target.value))}
+                  className="w-full accent-orange-500 h-2 bg-slate-800 rounded-lg cursor-pointer appearance-auto border border-slate-700"
+                  title="Filter Route Length Distance"
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] font-extrabold text-slate-400">
+                <span>5 km (Local)</span>
+                <span>25 km (Regional)</span>
+                <span>50+ km (All Uva)</span>
+              </div>
+            </div>
 
             {/* TRAVEL DISTANCE & MODE CALCULATOR BOX */}
             <div className="rounded-2xl bg-slate-50 border border-slate-200/80 p-3 dark:bg-slate-800/70 dark:border-slate-700">
