@@ -887,6 +887,67 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
+// Custom Vertical Zoom Slider Component for Leaflet Map
+function ZoomSliderControl() {
+  const map = useMap();
+  const [zoomLevel, setZoomLevel] = useState(map.getZoom());
+
+  useEffect(() => {
+    const handleZoom = () => setZoomLevel(map.getZoom());
+    map.on("zoomend", handleZoom);
+    return () => map.off("zoomend", handleZoom);
+  }, [map]);
+
+  const handleSliderChange = (e) => {
+    const newZoom = Number(e.target.value);
+    map.setZoom(newZoom);
+    setZoomLevel(newZoom);
+  };
+
+  return (
+    <div className="absolute top-4 left-4 z-[1000] flex flex-col items-center bg-slate-900/95 text-white p-2 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700 space-y-2 select-none">
+      {/* ZOOM IN (+) BUTTON */}
+      <button
+        type="button"
+        onClick={() => map.zoomIn()}
+        className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-800 hover:bg-emerald-600 text-white font-black text-sm transition active:scale-90 cursor-pointer"
+        title="Zoom In (+)"
+      >
+        +
+      </button>
+
+      {/* VERTICAL SLIDER RANGE TRACK */}
+      <div className="relative flex items-center justify-center h-24 my-1">
+        <input
+          type="range"
+          min="7"
+          max="19"
+          step="1"
+          value={Math.round(zoomLevel)}
+          onChange={handleSliderChange}
+          className="h-20 w-1.5 accent-emerald-400 bg-slate-800 rounded-full cursor-pointer appearance-none [writing-mode:vertical-lr] [direction:rtl]"
+          title={`Zoom Level: ${Math.round(zoomLevel)}x`}
+        />
+      </div>
+
+      {/* ZOOM OUT (-) BUTTON */}
+      <button
+        type="button"
+        onClick={() => map.zoomOut()}
+        className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-800 hover:bg-emerald-600 text-white font-black text-sm transition active:scale-90 cursor-pointer"
+        title="Zoom Out (-)"
+      >
+        −
+      </button>
+
+      {/* CURRENT ZOOM BADGE */}
+      <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded-md border border-emerald-500/30">
+        {Math.round(zoomLevel)}x
+      </span>
+    </div>
+  );
+}
+
 function Planner() {
   const navigate = useNavigate();
   const [mapAssets, setMapAssets] = useState(ALL_MAP_ASSETS);
@@ -1562,7 +1623,7 @@ function Planner() {
       </div>
 
       {/* 100% FULL-SCREEN LEAFLET MAP */}
-      <MapContainer center={DEFAULT_CENTER} zoom={11} scrollWheelZoom={true} className="h-full w-full">
+      <MapContainer center={DEFAULT_CENTER} zoom={11} zoomControl={false} scrollWheelZoom={true} className="h-full w-full">
         <TileLayer
           key={`tile-${mapStyle}`}
           url={MAP_TILE_CONFIGS[mapStyle].url}
@@ -1571,6 +1632,7 @@ function Planner() {
           attribution={MAP_TILE_CONFIGS[mapStyle].attribution}
         />
 
+        <ZoomSliderControl />
         <MapFlyToController flyTargetCoords={flyTargetCoords} />
         <NavigationCenterController isNavigating={isNavigating} userLocation={userLocation} />
         <MapBoundsController selectedAsset={selectedAsset} routePoints={routePoints} isNavigating={isNavigating} />
