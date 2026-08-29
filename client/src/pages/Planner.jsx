@@ -846,24 +846,8 @@ function MapBoundsController({ selectedAsset, routePoints, isNavigating }) {
   const map = useMap();
 
   useEffect(() => {
-    if (isNavigating) return; // Do not overwrite camera during active navigation
-    if (routePoints && routePoints.length >= 2) {
-      const validPoints = routePoints.filter(
-        (p) => Array.isArray(p) && p.length === 2 && !isNaN(Number(p[0])) && !isNaN(Number(p[1]))
-      );
-      if (validPoints.length >= 2) {
-        try {
-          const bounds = L.latLngBounds(validPoints);
-          if (bounds && bounds.isValid()) {
-            map.fitBounds(bounds, { padding: [60, 60], maxZoom: 14, animate: true });
-          }
-        } catch (e) {
-          console.warn("fitBounds warning:", e);
-        }
-      }
-    } else if (selectedAsset && selectedAsset.lat && selectedAsset.lng) {
-      map.flyTo([selectedAsset.lat, selectedAsset.lng], 13, { duration: 1.2 });
-    }
+    // Map remains steady at user's chosen zoom level during clicks and selections.
+    // Auto-zooming only occurs when user clicks "Track Location" or "Start Navigation".
   }, [selectedAsset, routePoints, isNavigating, map]);
 
   return null;
