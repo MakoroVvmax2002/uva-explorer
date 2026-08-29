@@ -1627,6 +1627,26 @@ function Planner() {
           attribution={MAP_TILE_CONFIGS[mapStyle].attribution}
         />
 
+        {/* HIGH-VISIBILITY ROAD NETWORK & PLACE NAME OVERLAYS FOR SATELLITE VIEW */}
+        {mapStyle === "maptiler_hybrid" && (
+          <>
+            <TileLayer
+              key="satellite-roads-overlay"
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}"
+              maxZoom={17}
+              maxNativeZoom={17}
+              opacity={0.95}
+            />
+            <TileLayer
+              key="satellite-places-overlay"
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+              maxZoom={17}
+              maxNativeZoom={17}
+              opacity={0.95}
+            />
+          </>
+        )}
+
         <ZoomSliderControl />
         <MapFlyToController flyTargetCoords={flyTargetCoords} />
         <NavigationCenterController isNavigating={isNavigating} userLocation={userLocation} />
