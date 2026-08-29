@@ -41,8 +41,26 @@ import {
 // DEFAULT MAP CENTER: Bandarawela Central Hub, Uva Province
 const DEFAULT_CENTER = [6.82977, 80.98457];
 
-// High-Definition Professional Map Tile Layer Configurations (100% Free & No API Key Required)
+const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY || "";
+
+// High-Definition Professional Map Tile Layer Configurations (MapTiler Cloud + ESRI Fallback)
 const MAP_TILE_CONFIGS = {
+  maptiler_hybrid: {
+    url: MAPTILER_KEY
+      ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    subdomains: [],
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  },
+  maptiler_streets: {
+    url: MAPTILER_KEY
+      ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
+      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+    subdomains: [],
+    maxZoom: 20,
+    attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  },
   voyager: {
     url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
     subdomains: [],
