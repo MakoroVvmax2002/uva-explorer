@@ -92,11 +92,14 @@ function App() {
   });
   const [showWelcomeModal, setShowWelcomeModal] = useState(() => {
     try {
-      return !localStorage.getItem("visitorName");
+      const name = localStorage.getItem("visitorName");
+      const introDone = localStorage.getItem("uva_intro_completed");
+      return !name || !introDone;
     } catch (e) {
       return true;
     }
   });
+  const [isLoadingVideoScreen, setIsLoadingVideoScreen] = useState(false);
 
   // Background Route Prefetching: Downloads all page chunks during idle time for 0ms page switches
   useEffect(() => {
@@ -129,7 +132,20 @@ function App() {
     try {
       localStorage.setItem("visitorName", name);
     } catch (e) {}
+
     setShowWelcomeModal(false);
+
+    // Show looping video loading screen on 1st time name submission
+    const isIntroDone = localStorage.getItem("uva_intro_completed");
+    if (!isIntroDone) {
+      setIsLoadingVideoScreen(true);
+      setTimeout(() => {
+        setIsLoadingVideoScreen(false);
+        try {
+          localStorage.setItem("uva_intro_completed", "true");
+        } catch (e) {}
+      }, 3500);
+    }
   };
 
   return (
@@ -138,8 +154,28 @@ function App() {
         {/* ROUTE GUARD TO AUTO-RESET ADMIN SESSION ON DEPARTURE */}
         <AdminSessionGuard />
 
+        {/* FULLSCREEN VIDEO LOADING OVERLAY (1ST TIME VISIT) */}
+        {isLoadingVideoScreen && (
+          <div className="fixed inset-0 z-[999999] flex items-center justify-center bg-slate-950 overflow-hidden animate-in fade-in duration-300">
+            <video
+              src="/videos/loading.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-2.5 rounded-full bg-slate-950/80 px-6 py-3 backdrop-blur-md border border-white/10 text-white shadow-2xl">
+              <Compass size={19} className="animate-spin text-teal-400 shrink-0" />
+              <span className="text-xs font-bold tracking-wide">
+                Welcome, {visitorName || "Traveler"}! Preparing your journey...
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* WELCOME / NAME PROMPT MODAL */}
-        {showWelcomeModal && (
+        {showWelcomeModal && !isLoadingVideoScreen && (
           <WelcomeModal
             visitorName={visitorName}
             onSaveName={handleSaveName}
