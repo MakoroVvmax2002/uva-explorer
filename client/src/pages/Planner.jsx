@@ -43,7 +43,7 @@ const DEFAULT_CENTER = [6.82977, 80.98457];
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY || "";
 
-// MapTiler Cloud Tile Layer Configurations (Streets-v4 & Hybrid-v4)
+// MapTiler Cloud Tile Layer Configurations (Streets-v4 & Hybrid-v4 with Strict Zoom Limits)
 const MAP_TILE_CONFIGS = {
   maptiler_streets: {
     name: "Streets Map (v4)",
@@ -51,7 +51,8 @@ const MAP_TILE_CONFIGS = {
       ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
       : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
     subdomains: [],
-    maxZoom: 20,
+    maxZoom: 18,
+    maxNativeZoom: 18,
     attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   },
   maptiler_hybrid: {
@@ -60,7 +61,8 @@ const MAP_TILE_CONFIGS = {
       ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`
       : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     subdomains: [],
-    maxZoom: 20,
+    maxZoom: 18,
+    maxNativeZoom: 18,
     attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   },
 };
@@ -887,12 +889,14 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-// Custom Vertical Zoom Slider Component for Leaflet Map
+// Custom Pure Vertical Zoom Slider Component (Clamped to Max 18x Zoom Limit)
 function ZoomSliderControl() {
   const map = useMap();
   const [zoomLevel, setZoomLevel] = useState(map.getZoom());
 
   useEffect(() => {
+    map.setMinZoom(8);
+    map.setMaxZoom(18);
     const handleZoom = () => setZoomLevel(map.getZoom());
     map.on("zoomend", handleZoom);
     return () => map.off("zoomend", handleZoom);
@@ -905,43 +909,33 @@ function ZoomSliderControl() {
   };
 
   return (
-    <div className="absolute top-4 left-4 z-[1000] flex flex-col items-center bg-slate-900/95 text-white p-2 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700 space-y-2 select-none">
-      {/* ZOOM IN (+) BUTTON */}
-      <button
-        type="button"
-        onClick={() => map.zoomIn()}
-        className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-800 hover:bg-emerald-600 text-white font-black text-sm transition active:scale-90 cursor-pointer"
-        title="Zoom In (+)"
-      >
-        +
-      </button>
+    <div className="absolute top-4 left-4 z-[1000] flex flex-col items-center bg-slate-900/95 text-white p-2.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700 space-y-2 select-none">
+      {/* MAX ZOOM INDICATOR ICON */}
+      <span className="text-[10px] font-black text-amber-400 uppercase tracking-tighter">
+        18x Max
+      </span>
 
-      {/* VERTICAL SLIDER RANGE TRACK */}
-      <div className="relative flex items-center justify-center h-24 my-1">
+      {/* PURE VERTICAL SLIDER RANGE TRACK */}
+      <div className="relative flex items-center justify-center h-28 my-1">
         <input
           type="range"
-          min="7"
-          max="19"
+          min="8"
+          max="18"
           step="1"
           value={Math.round(zoomLevel)}
           onChange={handleSliderChange}
-          className="h-20 w-1.5 accent-emerald-400 bg-slate-800 rounded-full cursor-pointer appearance-none [writing-mode:vertical-lr] [direction:rtl]"
-          title={`Zoom Level: ${Math.round(zoomLevel)}x`}
+          className="h-24 w-2 accent-emerald-400 bg-slate-800 rounded-full cursor-pointer appearance-none [writing-mode:vertical-lr] [direction:rtl] hover:accent-emerald-300 transition"
+          title={`Zoom Level: ${Math.round(zoomLevel)}x (Max Limit: 18x)`}
         />
       </div>
 
-      {/* ZOOM OUT (-) BUTTON */}
-      <button
-        type="button"
-        onClick={() => map.zoomOut()}
-        className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-800 hover:bg-emerald-600 text-white font-black text-sm transition active:scale-90 cursor-pointer"
-        title="Zoom Out (-)"
-      >
-        −
-      </button>
+      {/* MIN ZOOM INDICATOR ICON */}
+      <span className="text-[10px] font-extrabold text-slate-400">
+        8x Min
+      </span>
 
-      {/* CURRENT ZOOM BADGE */}
-      <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded-md border border-emerald-500/30">
+      {/* CURRENT ZOOM READOUT BADGE */}
+      <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30">
         {Math.round(zoomLevel)}x
       </span>
     </div>
@@ -1622,13 +1616,14 @@ function Planner() {
         </button>
       </div>
 
-      {/* 100% FULL-SCREEN LEAFLET MAP */}
-      <MapContainer center={DEFAULT_CENTER} zoom={11} zoomControl={false} scrollWheelZoom={true} className="h-full w-full">
+      {/* 100% FULL-SCREEN LEAFLET MAP WITH STRICT 8x - 18x ZOOM LIMIT */}
+      <MapContainer center={DEFAULT_CENTER} zoom={11} minZoom={8} maxZoom={18} zoomControl={false} scrollWheelZoom={true} className="h-full w-full">
         <TileLayer
           key={`tile-${mapStyle}`}
           url={MAP_TILE_CONFIGS[mapStyle].url}
           subdomains={MAP_TILE_CONFIGS[mapStyle].subdomains}
           maxZoom={MAP_TILE_CONFIGS[mapStyle].maxZoom}
+          maxNativeZoom={MAP_TILE_CONFIGS[mapStyle].maxNativeZoom}
           attribution={MAP_TILE_CONFIGS[mapStyle].attribution}
         />
 
