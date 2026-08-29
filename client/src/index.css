@@ -154,73 +154,92 @@ h1, h2, h3, .font-display {
 }
 
 /* ============================================================
-   PERFORMANCE MICRO-TRANSITIONS & MOTION SYSTEM
-   🌿 Smooth Fade + Slide Up + Card Lift + Image Zoom + Soft Scale
+   MODERN & PUNCHY (TECH / STARTUP FEEL) — 0.5s TRANSITION SYSTEM
+   Inspired by Ascend, Aspect, Aston, Astoria, Astra & Ascento
+   Curve: cubic-bezier(0.16, 1, 0.3, 1) [Apple / Stripe Tech Motion]
 ============================================================ */
 
-/* 1. Tourist Place Card Hover (250ms lift + shadow & 400ms image zoom) */
-.place-card {
-  transition: transform 0.25s ease-out, box-shadow 0.25s ease-out, background-color 0.25s ease-out, border-color 0.25s ease-out;
+:root {
+  --ease-tech: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-tech: 0.5s;
 }
 
-.place-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 14px 32px rgba(38, 51, 45, 0.12);
+/* Global 0.5s Tech Transitions for Interactive & Stateful Elements */
+a, button, input, select, textarea, .transition-all, .btn-action {
+  transition-duration: 0.5s !important;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.dark .place-card:hover {
-  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+/* 1. ASCEND & ASPECT — Card Lift & Spring Elevation (0.5s Lift) */
+.place-card, .tech-card, .card-ascend {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1), 
+              background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-.place-card img {
-  transition: transform 0.4s ease-out;
+.place-card:hover, .tech-card:hover, .card-ascend:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 20px 40px -10px rgba(15, 118, 110, 0.18), 0 8px 16px -4px rgba(15, 118, 110, 0.08) !important;
 }
 
-.place-card:hover img {
-  transform: scale(1.05);
+.dark .place-card:hover, .dark .tech-card:hover, .dark .card-ascend:hover {
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 8px 16px -4px rgba(15, 118, 110, 0.2) !important;
 }
 
-/* 2. Interactive Buttons & Nav Links (no harsh outline borders) */
-button, .btn-action, nav a, header a, a {
-  border-style: none;
-  outline: none;
-  transition: background-color 0.2s ease-out, border-color 0.2s ease-out, color 0.2s ease-out, transform 0.2s ease-out, box-shadow 0.2s ease-out;
+/* 2. ASPEN & ASTORIA — Image Pan & Scale Zoom (0.5s Tech Smooth Zoom) */
+.place-card img, .tech-zoom img {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-input, select, textarea {
-  transition: border-color 0.2s ease-out, box-shadow 0.2s ease-out, background-color 0.2s ease-out;
+.place-card:hover img, .tech-zoom:hover img {
+  transform: scale(1.08);
 }
 
-/* 4. Page Section & Content Entrance (450ms fade + slide up) */
-@keyframes pageSectionEntrance {
-  from {
+/* 3. ASCENTO & ASTON — Interactive Button Press (0.5s Punchy Press) */
+button:active, .btn-ascento:active {
+  transform: scale(0.96) !important;
+}
+
+/* 4. ASTRA & ASTRAY — Page Entrance & Route Switch (0.5s Tech Slide-Up + Blur) */
+@keyframes techPageAscend {
+  0% {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(16px) scale(0.985);
+    filter: blur(4px);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 
-.animate-section-fade {
-  animation: pageSectionEntrance 0.45s ease-out forwards;
+.animate-section-fade, .page-transition {
+  animation: techPageAscend 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* 5. Modal & Overlay Entrance (250ms fade + scale) */
-@keyframes modalScaleEntrance {
-  from {
+/* 5. ASTORIA & ASPECTA — Modal & Overlay Glass Reveal (0.5s Spring Scale) */
+@keyframes techModalAstoria {
+  0% {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.92) translateY(12px);
+    filter: blur(8px);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
+    filter: blur(0);
   }
 }
 
-.modal-enter {
-  animation: modalScaleEntrance 0.25s ease-out forwards;
+.modal-enter, .modal-astoria {
+  animation: techModalAstoria 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 6. ASTRAY & ASPECT — Tab & Filter Spring Transitions (0.5s) */
+.tab-ascento {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 /* ============================================================
