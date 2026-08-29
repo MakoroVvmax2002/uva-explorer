@@ -43,7 +43,7 @@ const DEFAULT_CENTER = [6.82977, 80.98457];
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_API_KEY || "";
 
-// MapTiler Cloud Tile Layer Configurations (Streets-v4 & Hybrid-v4 with Strict Zoom Limits)
+// MapTiler Cloud Tile Layer Configurations (Streets-v4 & Hybrid-v4 with Strict 10x - 17x Zoom Limit)
 const MAP_TILE_CONFIGS = {
   maptiler_streets: {
     name: "Streets Map (v4)",
@@ -51,8 +51,8 @@ const MAP_TILE_CONFIGS = {
       ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
       : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
     subdomains: [],
-    maxZoom: 18,
-    maxNativeZoom: 18,
+    maxZoom: 17,
+    maxNativeZoom: 17,
     attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   },
   maptiler_hybrid: {
@@ -61,8 +61,8 @@ const MAP_TILE_CONFIGS = {
       ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`
       : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     subdomains: [],
-    maxZoom: 18,
-    maxNativeZoom: 18,
+    maxZoom: 17,
+    maxNativeZoom: 17,
     attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   },
 };
@@ -889,14 +889,14 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-// Custom Pure Vertical Zoom Slider Component (Clamped to Max 18x Zoom Limit)
+// Custom Pure Vertical Zoom Slider Component (Clamped to 10x Min and 17x Max Limits)
 function ZoomSliderControl() {
   const map = useMap();
   const [zoomLevel, setZoomLevel] = useState(map.getZoom());
 
   useEffect(() => {
-    map.setMinZoom(8);
-    map.setMaxZoom(18);
+    map.setMinZoom(10);
+    map.setMaxZoom(17);
     const handleZoom = () => setZoomLevel(map.getZoom());
     map.on("zoomend", handleZoom);
     return () => map.off("zoomend", handleZoom);
@@ -912,26 +912,26 @@ function ZoomSliderControl() {
     <div className="absolute top-4 left-4 z-[1000] flex flex-col items-center bg-slate-900/95 text-white p-2.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700 space-y-2 select-none">
       {/* MAX ZOOM INDICATOR ICON */}
       <span className="text-[10px] font-black text-amber-400 uppercase tracking-tighter">
-        18x Max
+        17x Max
       </span>
 
       {/* PURE VERTICAL SLIDER RANGE TRACK */}
       <div className="relative flex items-center justify-center h-28 my-1">
         <input
           type="range"
-          min="8"
-          max="18"
+          min="10"
+          max="17"
           step="1"
           value={Math.round(zoomLevel)}
           onChange={handleSliderChange}
           className="h-24 w-2 accent-emerald-400 bg-slate-800 rounded-full cursor-pointer appearance-none [writing-mode:vertical-lr] [direction:rtl] hover:accent-emerald-300 transition"
-          title={`Zoom Level: ${Math.round(zoomLevel)}x (Max Limit: 18x)`}
+          title={`Zoom Level: ${Math.round(zoomLevel)}x (Min: 10x, Max: 17x)`}
         />
       </div>
 
       {/* MIN ZOOM INDICATOR ICON */}
       <span className="text-[10px] font-extrabold text-slate-400">
-        8x Min
+        10x Min
       </span>
 
       {/* CURRENT ZOOM READOUT BADGE */}
@@ -1616,8 +1616,8 @@ function Planner() {
         </button>
       </div>
 
-      {/* 100% FULL-SCREEN LEAFLET MAP WITH STRICT 8x - 18x ZOOM LIMIT */}
-      <MapContainer center={DEFAULT_CENTER} zoom={11} minZoom={8} maxZoom={18} zoomControl={false} scrollWheelZoom={true} className="h-full w-full">
+      {/* 100% FULL-SCREEN LEAFLET MAP WITH STRICT 10x - 17x ZOOM LIMIT */}
+      <MapContainer center={DEFAULT_CENTER} zoom={11} minZoom={10} maxZoom={17} zoomControl={false} scrollWheelZoom={true} className="h-full w-full">
         <TileLayer
           key={`tile-${mapStyle}`}
           url={MAP_TILE_CONFIGS[mapStyle].url}
