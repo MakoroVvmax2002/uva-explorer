@@ -323,10 +323,16 @@ const PLACE_CONTACT_NUMBERS = {
 
 const FALLBACK_PLACES_MAP = {
   "1": {
-    _id: "1", id: "1", name: "Nine Arches Bridge", category: "Sightseeing", location: "Demodara, Ella, Sri Lanka.", district: "Badulla", rating: 0, reviewsCount: 0,
+    _id: "1", id: "1", name: "Nine Arches Bridge", category: "Sightseeing", location: "Demodara, Ella, Sri Lanka.", district: "Badulla", rating: 4.9, reviewsCount: 312,
     description: "The Nine Arches Bridge in Ella is one of the most iconic bridges in Sri Lanka and a masterpiece of early 20th-century railway engineering. Built during the British colonial era entirely out of stone, brick, and cement without steel reinforcement, this towering 30-meter high viaduct spans lush green tea valleys and dense jungle.",
-    images: ["/images/places/nine-arches-bridge.jpg", "/images/places/nine-arches-bridge.jpg"],
-    image: "/images/places/nine-arches-bridge.jpg",
+    images: [
+      "/images/places/nine-arches-bridge-1.jpg",
+      "/images/places/nine-arches-bridge-2.jpg",
+      "/images/places/nine-arches-bridge-3.jpg",
+      "/images/places/nine-arches-bridge-4.jpg",
+      "/images/places/nine-arches-bridge-5.jpg"
+    ],
+    image: "/images/places/nine-arches-bridge-1.jpg",
     lat: 6.87676, lng: 81.06076,
     phone: "N/A",
     bestTimeToVisit: "6:00 AM - 9:00 AM & 3:00 PM (Train Passing Times)",
@@ -336,10 +342,19 @@ const FALLBACK_PLACES_MAP = {
     entryFee: "Free Admission",
   },
   "2": {
-    _id: "2", id: "2", name: "Ella Rock", category: "Sightseeing / Hiking", location: "Ella Rock Hiking Resort, Kithalella, Ella, 90090, Sri Lanka.", district: "Badulla", rating: 0, reviewsCount: 0,
+    _id: "2", id: "2", name: "Ella Rock", category: "Sightseeing / Hiking", location: "Ella Rock Hiking Resort, Kithalella, Ella, 90090, Sri Lanka.", district: "Badulla", rating: 4.8, reviewsCount: 240,
     description: "Ella Rock is a famous cliff summit offering sweeping panoramic views of the Uva highlands, tea plantations, and the dramatic Ella Gap. The 4-hour round trip hike takes travelers through active railway tracks, eucalyptus forests, and tea plantations.",
-    images: ["/images/places/ella-rock.jpeg", "/images/places/ella-rock.jpeg"],
-    image: "/images/places/ella-rock.jpeg",
+    images: [
+      "/images/places/ella-rock-1.jpg",
+      "/images/places/ella-rock-2.jpg",
+      "/images/places/ella-rock-3.jpg",
+      "/images/places/ella-rock-4.jpg",
+      "/images/places/ella-rock-5.jpg",
+      "/images/places/ella-rock-6.jpg",
+      "/images/places/ella-rock-7.jpg",
+      "/images/places/ella-rock-8.jpg"
+    ],
+    image: "/images/places/ella-rock-1.jpg",
     lat: 6.8538, lng: 81.0464,
     phone: "N/A",
     bestTimeToVisit: "Early Morning (6:00 AM - 10:00 AM)",
@@ -349,10 +364,17 @@ const FALLBACK_PLACES_MAP = {
     entryFee: "Free",
   },
   "3": {
-    _id: "3", id: "3", name: "Little Adam's Peak", category: "Sightseeing / Hiking", location: "Little Adam's Peak, Ella-Passara Road, Ella, Uva, Sri Lanka.", district: "Badulla", rating: 0, reviewsCount: 0,
+    _id: "3", id: "3", name: "Little Adam's Peak", category: "Sightseeing / Hiking", location: "Little Adam's Peak, Ella-Passara Road, Ella, Uva, Sri Lanka.", district: "Badulla", rating: 4.8, reviewsCount: 198,
     description: "Little Adam's Peak (Punchi Sri Pada) is a scenic 1,141m mountain peak in Ella named after the sacred Adam's Peak due to its matching pyramid shape. The trail winds through picturesque tea gardens with paved steps leading to breathtaking 360-degree sunset views.",
-    images: ["/images/places/little-adams-peak.jpg", "/images/places/little-adams-peak.jpg"],
-    image: "/images/places/little-adams-peak.jpg",
+    images: [
+      "/images/places/little-adams-peak-1.jpg",
+      "/images/places/little-adams-peak-2.jpg",
+      "/images/places/little-adams-peak-3.jpg",
+      "/images/places/little-adams-peak-4.jpg",
+      "/images/places/little-adams-peak-5.jpg",
+      "/images/places/little-adams-peak-6.jpg"
+    ],
+    image: "/images/places/little-adams-peak-1.jpg",
     lat: 6.8625, lng: 81.0638,
     phone: "+94 70 110 0021",
     bestTimeToVisit: "Late Afternoon Sunset (4:30 PM - 6:15 PM)",
@@ -362,10 +384,18 @@ const FALLBACK_PLACES_MAP = {
     entryFee: "Free",
   },
   "4": {
-    _id: "4", id: "4", name: "Ravana Falls", category: "Sightseeing", location: "Ravana Ella, Ella Wellawaya Road, Ella, 90090, Sri Lanka.", district: "Badulla", rating: 0, reviewsCount: 0,
+    _id: "4", id: "4", name: "Ravana Falls", category: "Sightseeing", location: "Ravana Ella, Ella Wellawaya Road, Ella, 90090, Sri Lanka.", district: "Badulla", rating: 4.6, reviewsCount: 154,
     description: "Ravana Falls is a popular 25-meter (82 ft) cascading waterfall located along the main Ella-Wellawaya highway. Named after the legendary King Ravana from the Ramayana epic, it surges with impressive volume during monsoon season.",
-    images: ["/images/places/ravana-fall.jpg", "/images/places/ravana-fall.jpg"],
-    image: "/images/places/ravana-fall.jpg",
+    images: [
+      "/images/places/ravana-fall-1.jpg",
+      "/images/places/ravana-fall-2.jpg",
+      "/images/places/ravana-fall-3.jpg",
+      "/images/places/ravana-fall-4.jpg",
+      "/images/places/ravana-fall-5.jpg",
+      "/images/places/ravana-fall-6.jpg",
+      "/images/places/ravana-fall-7.jpg"
+    ],
+    image: "/images/places/ravana-fall-1.jpg",
     lat: 6.84074, lng: 81.05492,
     phone: "N/A",
     bestTimeToVisit: "Morning (8:00 AM - 12:00 PM)",
@@ -375,10 +405,22 @@ const FALLBACK_PLACES_MAP = {
     entryFee: "Free",
   },
   "5": {
-    _id: "5", id: "5", name: "Dowa Rock Temple", category: "Heritage", location: "Dowa Rock Temple, Badulla Bandarawela Road, Bandarawela, Sri Lanka .", district: "Badulla", rating: 0, reviewsCount: 0,
+    _id: "5", id: "5", name: "Dowa Rock Temple", category: "Heritage", location: "Dowa Rock Temple, Badulla Bandarawela Road, Bandarawela, Sri Lanka .", district: "Badulla", rating: 4.5, reviewsCount: 92,
     description: "Dowa Rock Temple is an ancient 2,000-year-old heritage site located along the Badulla-Bandarawela main road. It features a giant 38-foot unfinished rock-carved Buddha statue and vibrant cave paintings dating back to King Walagamba's reign.",
-    images: ["/images/places/dowa-rock-temple.jpg", "/images/places/dowa-rock-temple.jpg"],
-    image: "/images/places/dowa-rock-temple.jpg",
+    images: [
+      "/images/places/dowa-rock-temple-1.jpg",
+      "/images/places/dowa-rock-temple-2.jpg",
+      "/images/places/dowa-rock-temple-3.jpg",
+      "/images/places/dowa-rock-temple-4.jpg",
+      "/images/places/dowa-rock-temple-5.jpg",
+      "/images/places/dowa-rock-temple-6.jpg",
+      "/images/places/dowa-rock-temple-7.jpg",
+      "/images/places/dowa-rock-temple-8.jpg",
+      "/images/places/dowa-rock-temple-9.jpg",
+      "/images/places/dowa-rock-temple-10.jpg",
+      "/images/places/dowa-rock-temple-11.jpg"
+    ],
+    image: "/images/places/dowa-rock-temple-1.jpg",
     lat: 6.857426, lng: 81.022059,
     phone: "+94 57 222 8630",
     bestTimeToVisit: "Morning to Midday (8:00 AM - 4:00 PM)",
@@ -388,9 +430,12 @@ const FALLBACK_PLACES_MAP = {
     entryFee: "LKR 100 - 200",
   },
   "6": {
-    _id: "6", id: "6", name: "Lipton's Seat", category: "Sightseeing", location: "Lipton Seat Road, Dambethenna Estate, Haputale 90160, Sri Lanka.", district: "Badulla", rating: 0, reviewsCount: 0,
+    _id: "6", id: "6", name: "Lipton's Seat", category: "Sightseeing", location: "Lipton Seat Road, Dambethenna Estate, Haputale 90160, Sri Lanka.", district: "Badulla", rating: 4.8, reviewsCount: 210,
     description: "Lipton's Seat is a famous high-altitude observation point in Haputale where tea pioneer Sir Thomas Lipton sat to admire his vast tea plantations. On clear days, it offers panoramic vistas across seven provinces of Sri Lanka.",
-    images: ["/images/places/liptons-seat.jpg", "/images/places/liptons-seat.jpg"],
+    images: [
+      "/images/places/liptons-seat.jpg",
+      "/images/places/liptons-seat.jpg"
+    ],
     image: "/images/places/liptons-seat.jpg",
     lat: 6.789521, lng: 81.017612,
     phone: "+94 57 567 0595",
@@ -401,10 +446,16 @@ const FALLBACK_PLACES_MAP = {
     entryFee: "LKR 500",
   },
   "7": {
-    _id: "7", id: "7", name: "Adisham Bungalow", category: "Heritage", location: "Adisham Bungalow, Adisham Rd, Haputale 90160, Sri Lanka.", district: "Badulla", rating: 0, reviewsCount: 0,
+    _id: "7", id: "7", name: "Adisham Bungalow", category: "Heritage", location: "Adisham Bungalow, Adisham Rd, Haputale 90160, Sri Lanka.", district: "Badulla", rating: 4.7, reviewsCount: 165,
     description: "Adisham Bungalow is a stately 1931 Tudor-style mansion built by Sir Thomas Villiers, now operating as St. Benedict's Monastery. Surrounded by the Tangamalai bird sanctuary, it features granite walls, English gardens, and a famous homemade fruit jam shop.",
-    images: ["/images/places/adisham-bungalow.jpg", "/images/places/adisham-bungalow.jpg"],
-    image: "/images/places/adisham-bungalow.jpg",
+    images: [
+      "/images/places/adisham-bungalow-1.jpg",
+      "/images/places/adisham-bungalow-2.jpg",
+      "/images/places/adisham-bungalow-3.jpg",
+      "/images/places/adisham-bungalow-4.jpg",
+      "/images/places/adisham-bungalow-5.jpg"
+    ],
+    image: "/images/places/adisham-bungalow-1.jpg",
     lat: 6.773087, lng: 80.930990,
     phone: "+94 57 226 8030",
     bestTimeToVisit: "Weekends & Public Holidays (9:00 AM - 4:00 PM)",
@@ -414,10 +465,22 @@ const FALLBACK_PLACES_MAP = {
     entryFee: "LKR 200",
   },
   "8": {
-    _id: "8", id: "8", name: "Porowagala Viewpoint", category: "Sightseeing", location: "Mahaulpatha, Galkanda, Bandarawela, Sri Lanka", district: "Badulla", rating: 0, reviewsCount: 0,
+    _id: "8", id: "8", name: "Porowagala Viewpoint", category: "Sightseeing", location: "Mahaulpatha, Galkanda, Bandarawela, Sri Lanka", district: "Badulla", rating: 4.6, reviewsCount: 88,
     description: "Porowagala Viewpoint is a serene cliffside lookout near Bandarawela town offering magnificent views of surrounding tea hills, vegetable farms, and distant mountain ranges.",
-    images: ["/images/places/porowagala-viewpoint.jpg", "/images/places/porowagala-viewpoint.jpg"],
-    image: "/images/places/porowagala-viewpoint.jpg",
+    images: [
+      "/images/places/porowagala-viewpoint-1.jpg",
+      "/images/places/porowagala-viewpoint-2.jpg",
+      "/images/places/porowagala-viewpoint-3.jpg",
+      "/images/places/porowagala-viewpoint-4.jpg",
+      "/images/places/porowagala-viewpoint-5.jpg",
+      "/images/places/porowagala-viewpoint-6.jpg",
+      "/images/places/porowagala-viewpoint-7.jpg",
+      "/images/places/porowagala-viewpoint-8.jpg",
+      "/images/places/porowagala-viewpoint-9.jpg",
+      "/images/places/porowagala-viewpoint-10.jpg",
+      "/images/places/porowagala-viewpoint-11.jpg"
+    ],
+    image: "/images/places/porowagala-viewpoint-1.jpg",
     lat: 6.830560, lng: 81.012682,
     phone: "055 222 9675",
     bestTimeToVisit: "Morning or Sunset",
@@ -427,10 +490,16 @@ const FALLBACK_PLACES_MAP = {
     entryFee: "Free",
   },
   "9": {
-    _id: "9", id: "9", name: "Rawana Ella Cave", category: "Historical", location: "Ravana Ella Cave, Ella Wellawaya Road, Ella.", district: "Badulla", rating: 0, reviewsCount: 0,
+    _id: "9", id: "9", name: "Rawana Ella Cave", category: "Historical", location: "Ravana Ella Cave, Ella Wellawaya Road, Ella.", district: "Badulla", rating: 4.5, reviewsCount: 76,
     description: "Historical cave site located 1,370m above sea level near Ella, steeped in Ramayana folklore.",
-    images: ["/images/places/rawana-ella-cave.jpg"],
-    image: "/images/places/rawana-ella-cave.jpg",
+    images: [
+      "/images/places/rawana-ella-cave-1.jpg",
+      "/images/places/rawana-ella-cave-2.jpg",
+      "/images/places/rawana-ella-cave-3.jpg",
+      "/images/places/rawana-ella-cave-4.jpg",
+      "/images/places/rawana-ella-cave-5.jpg"
+    ],
+    image: "/images/places/rawana-ella-cave-1.jpg",
     lat: 6.864793, lng: 81.048639,
     phone: "+94 71 613 1211",
     bestTimeToVisit: "Morning",

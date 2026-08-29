@@ -532,24 +532,155 @@ function Admin() {
 
         // Comprehensive catalog of curated Uva Province destinations if server API is offline
         setPlaces([
-          { _id: "1", name: "Nine Arches Bridge", category: "Sightseeing", location: "Demodara, Ella, Sri Lanka", district: "Badulla", rating: 4.9, reviews: 312, image: "/images/places/nine-arches-bridge.jpg", distance: "24km" },
-          { _id: "2", name: "Ella Rock", category: "Sightseeing / Hiking", location: "Kithalella, Ella, 90090, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 240, image: "/images/places/ella-rock.jpg", distance: "22km" },
-          { _id: "3", name: "Little Adam's Peak", category: "Sightseeing / Hiking", location: "Ella-Passara Road, Ella, Uva, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 198, image: "/images/places/little-adams-peak.jpg", distance: "23km" },
-          { _id: "4", name: "Ravana Fall", category: "Sightseeing", location: "Wellawaya Road (A23), Ella, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 154, image: "/images/places/ravana-fall.jpg", distance: "20km" },
-          { _id: "5", name: "Dowa Rock Temple", category: "Heritage", location: "Badulla Bandarawela Road, Bandarawela", district: "Badulla", rating: 4.5, reviews: 92, image: "/images/places/dowa-rock-temple.jpg", distance: "6km" },
-          { _id: "6", name: "Lipton's Seat", category: "Sightseeing", location: "Dambethenna Estate, Haputale", district: "Badulla", rating: 4.8, reviews: 210, image: "/images/places/liptons-seat.jpg", distance: "18km" },
-          { _id: "7", name: "Adisham Bungalow", category: "Monuments / Architecture", location: "Adisham Rd, Haputale 90160", district: "Badulla", rating: 4.7, reviews: 165, image: "/images/places/adisham-bungalow.jpg", distance: "14km" },
-          { _id: "8", name: "Porowagala Viewpoint", category: "Sightseeing", location: "Mahaulpatha, Galkanda, Bandarawela", district: "Badulla", rating: 4.6, reviews: 88, image: "/images/places/porowagala-viewpoint.jpg", distance: "3km" },
-          { _id: "9", name: "Rawana Ella Cave", category: "Historical", location: "Ella Wellawaya Road, Ella", district: "Badulla", rating: 4.5, reviews: 76, image: "/images/places/rawana-ella-cave.jpg", distance: "21km" },
-          { _id: "10", name: "Halpewatte Tea Factory", category: "Cultural", location: "Badulla Road, Hela Halpe, Ella", district: "Badulla", rating: 4.7, reviews: 130, image: "/images/places/halpewatte-tea-factory.jpg", distance: "25km" },
-          { _id: "11", name: "Diyaluma Falls", category: "Sightseeing", location: "Koslanda, Wellawaya, Sri Lanka", district: "Badulla", rating: 4.9, reviews: 280, image: "/images/places/diyaluma-falls.jpg", distance: "32km" },
-          { _id: "12", name: "Bambarakanda Falls", category: "Sightseeing", location: "Kalupahana, Haldummulla, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 195, image: "/images/places/bambarakanda-falls.jpg", distance: "28km" },
-          { _id: "13", name: "Dunhinda Falls", category: "Sightseeing", location: "Badulla, Sri Lanka", district: "Badulla", rating: 4.7, reviews: 215, image: "/images/places/dunhinda-falls.jpg", distance: "30km" },
-          { _id: "14", name: "Muthiyangana Raja Maha Viharaya", category: "Religious", location: "Badulla Town, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 140, image: "/images/places/muthiyangana.jpg", distance: "28km" },
-          { _id: "15", name: "Bogoda Wooden Bridge", category: "Heritage", location: "Hali-Ela, Badulla, Sri Lanka", district: "Badulla", rating: 4.5, reviews: 85, image: "/images/places/bogoda-wooden-bridge.jpg", distance: "22km" },
-          { _id: "16", name: "Mahiyanganaya Stupa", category: "Religious", location: "Mahiyanganaya, Badulla, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 310, image: "/images/places/mahiyanganaya.jpg", distance: "65km" },
-          { _id: "17", name: "Sorabora Wewa", category: "Sightseeing", location: "Mahiyanganaya, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 120, image: "/images/places/sorabora-wewa.jpg", distance: "67km" },
-          { _id: "18", name: "Maduru Oya National Park", category: "Nature", location: "Mahiyanganaya Border, Sri Lanka", district: "Badulla", rating: 4.7, reviews: 160, image: "/images/places/maduru-oya.jpg", distance: "78km" },
+          {
+            _id: "1", name: "Nine Arches Bridge", category: "Sightseeing", location: "Demodara, Ella, Sri Lanka", district: "Badulla", rating: 4.9, reviews: 312,
+            image: "/images/places/nine-arches-bridge-1.jpg",
+            images: [
+              "/images/places/nine-arches-bridge-1.jpg",
+              "/images/places/nine-arches-bridge-2.jpg",
+              "/images/places/nine-arches-bridge-3.jpg",
+              "/images/places/nine-arches-bridge-4.jpg",
+              "/images/places/nine-arches-bridge-5.jpg"
+            ],
+            distance: "24km"
+          },
+          {
+            _id: "2", name: "Ella Rock", category: "Sightseeing / Hiking", location: "Kithalella, Ella, 90090, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 240,
+            image: "/images/places/ella-rock-1.jpg",
+            images: [
+              "/images/places/ella-rock-1.jpg",
+              "/images/places/ella-rock-2.jpg",
+              "/images/places/ella-rock-3.jpg",
+              "/images/places/ella-rock-4.jpg",
+              "/images/places/ella-rock-5.jpg",
+              "/images/places/ella-rock-6.jpg",
+              "/images/places/ella-rock-7.jpg",
+              "/images/places/ella-rock-8.jpg"
+            ],
+            distance: "22km"
+          },
+          {
+            _id: "3", name: "Little Adam's Peak", category: "Sightseeing / Hiking", location: "Ella-Passara Road, Ella, Uva, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 198,
+            image: "/images/places/little-adams-peak-1.jpg",
+            images: [
+              "/images/places/little-adams-peak-1.jpg",
+              "/images/places/little-adams-peak-2.jpg",
+              "/images/places/little-adams-peak-3.jpg",
+              "/images/places/little-adams-peak-4.jpg",
+              "/images/places/little-adams-peak-5.jpg",
+              "/images/places/little-adams-peak-6.jpg"
+            ],
+            distance: "23km"
+          },
+          {
+            _id: "4", name: "Ravana Fall", category: "Sightseeing", location: "Wellawaya Road (A23), Ella, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 154,
+            image: "/images/places/ravana-fall-1.jpg",
+            images: [
+              "/images/places/ravana-fall-1.jpg",
+              "/images/places/ravana-fall-2.jpg",
+              "/images/places/ravana-fall-3.jpg",
+              "/images/places/ravana-fall-4.jpg",
+              "/images/places/ravana-fall-5.jpg",
+              "/images/places/ravana-fall-6.jpg",
+              "/images/places/ravana-fall-7.jpg"
+            ],
+            distance: "20km"
+          },
+          {
+            _id: "5", name: "Dowa Rock Temple", category: "Heritage", location: "Badulla Bandarawela Road, Bandarawela", district: "Badulla", rating: 4.5, reviews: 92,
+            image: "/images/places/dowa-rock-temple-1.jpg",
+            images: [
+              "/images/places/dowa-rock-temple-1.jpg",
+              "/images/places/dowa-rock-temple-2.jpg",
+              "/images/places/dowa-rock-temple-3.jpg",
+              "/images/places/dowa-rock-temple-4.jpg",
+              "/images/places/dowa-rock-temple-5.jpg",
+              "/images/places/dowa-rock-temple-6.jpg",
+              "/images/places/dowa-rock-temple-7.jpg",
+              "/images/places/dowa-rock-temple-8.jpg",
+              "/images/places/dowa-rock-temple-9.jpg",
+              "/images/places/dowa-rock-temple-10.jpg",
+              "/images/places/dowa-rock-temple-11.jpg"
+            ],
+            distance: "6km"
+          },
+          {
+            _id: "6", name: "Lipton's Seat", category: "Sightseeing", location: "Dambethenna Estate, Haputale", district: "Badulla", rating: 4.8, reviews: 210,
+            image: "/images/places/liptons-seat.jpg",
+            images: [
+              "/images/places/liptons-seat.jpg",
+              "/images/places/liptons-seat.jpg"
+            ],
+            distance: "18km"
+          },
+          {
+            _id: "7", name: "Adisham Bungalow", category: "Monuments / Architecture", location: "Adisham Rd, Haputale 90160", district: "Badulla", rating: 4.7, reviews: 165,
+            image: "/images/places/adisham-bungalow-1.jpg",
+            images: [
+              "/images/places/adisham-bungalow-1.jpg",
+              "/images/places/adisham-bungalow-2.jpg",
+              "/images/places/adisham-bungalow-3.jpg",
+              "/images/places/adisham-bungalow-4.jpg",
+              "/images/places/adisham-bungalow-5.jpg"
+            ],
+            distance: "14km"
+          },
+          {
+            _id: "8", name: "Porowagala Viewpoint", category: "Sightseeing", location: "Mahaulpatha, Galkanda, Bandarawela", district: "Badulla", rating: 4.6, reviews: 88,
+            image: "/images/places/porowagala-viewpoint-1.jpg",
+            images: [
+              "/images/places/porowagala-viewpoint-1.jpg",
+              "/images/places/porowagala-viewpoint-2.jpg",
+              "/images/places/porowagala-viewpoint-3.jpg",
+              "/images/places/porowagala-viewpoint-4.jpg",
+              "/images/places/porowagala-viewpoint-5.jpg",
+              "/images/places/porowagala-viewpoint-6.jpg",
+              "/images/places/porowagala-viewpoint-7.jpg",
+              "/images/places/porowagala-viewpoint-8.jpg",
+              "/images/places/porowagala-viewpoint-9.jpg",
+              "/images/places/porowagala-viewpoint-10.jpg",
+              "/images/places/porowagala-viewpoint-11.jpg"
+            ],
+            distance: "3km"
+          },
+          {
+            _id: "9", name: "Rawana Ella Cave", category: "Historical", location: "Ella Wellawaya Road, Ella", district: "Badulla", rating: 4.5, reviews: 76,
+            image: "/images/places/rawana-ella-cave-1.jpg",
+            images: [
+              "/images/places/rawana-ella-cave-1.jpg",
+              "/images/places/rawana-ella-cave-2.jpg",
+              "/images/places/rawana-ella-cave-3.jpg",
+              "/images/places/rawana-ella-cave-4.jpg",
+              "/images/places/rawana-ella-cave-5.jpg"
+            ],
+            distance: "21km"
+          },
+          { _id: "10", name: "Halpewatte Tea Factory", category: "Cultural", location: "Badulla Road, Hela Halpe, Ella", district: "Badulla", rating: 4.7, reviews: 130, image: "/images/places/halpewatte-tea-factory.jpg", images: ["/images/places/halpewatte-tea-factory.jpg"], distance: "25km" },
+          { _id: "11", name: "Diyaluma Falls", category: "Sightseeing", location: "Koslanda, Wellawaya, Sri Lanka", district: "Badulla", rating: 4.9, reviews: 280, image: "/images/places/diyaluma-falls.jpg", images: ["/images/places/diyaluma-falls.jpg"], distance: "32km" },
+          { _id: "12", name: "Bambarakanda Falls", category: "Sightseeing", location: "Kalupahana, Haldummulla, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 195, image: "/images/places/bambarakanda-falls.jpg", images: ["/images/places/bambarakanda-falls.jpg"], distance: "28km" },
+          { _id: "13", name: "Dunhinda Falls", category: "Sightseeing", location: "Badulla, Sri Lanka", district: "Badulla", rating: 4.7, reviews: 215, image: "/images/places/dunhinda-falls.jpg", images: ["/images/places/dunhinda-falls.jpg"], distance: "30km" },
+          { _id: "14", name: "Muthiyangana Raja Maha Viharaya", category: "Religious", location: "Badulla Town, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 140, image: "/images/places/muthiyangana.jpg", images: ["/images/places/muthiyangana.jpg"], distance: "28km" },
+          { _id: "15", name: "Bogoda Wooden Bridge", category: "Heritage", location: "Hali-Ela, Badulla, Sri Lanka", district: "Badulla", rating: 4.5, reviews: 85, image: "/images/places/bogoda-wooden-bridge.jpg", images: ["/images/places/bogoda-wooden-bridge.jpg"], distance: "22km" },
+          {
+            _id: "16", name: "Mahiyanganaya Stupa", category: "Religious", location: "Mahiyanganaya, Badulla, Sri Lanka", district: "Badulla", rating: 4.8, reviews: 310,
+            image: "/images/places/kumbalwela-mahamewnawa-1.jpg",
+            images: [
+              "/images/places/kumbalwela-mahamewnawa-1.jpg",
+              "/images/places/kumbalwela-mahamewnawa-2.jpg",
+              "/images/places/kumbalwela-mahamewnawa-3.jpg",
+              "/images/places/kumbalwela-mahamewnawa-4.jpg",
+              "/images/places/kumbalwela-mahamewnawa-5.jpg",
+              "/images/places/kumbalwela-mahamewnawa-6.jpg",
+              "/images/places/kumbalwela-mahamewnawa-7.jpg",
+              "/images/places/kumbalwela-mahamewnawa-8.jpg",
+              "/images/places/kumbalwela-mahamewnawa-9.jpg",
+              "/images/places/kumbalwela-mahamewnawa-10.jpg",
+              "/images/places/kumbalwela-mahamewnawa-11.jpg"
+            ],
+            distance: "65km"
+          },
+          { _id: "17", name: "Sorabora Wewa", category: "Sightseeing", location: "Mahiyanganaya, Sri Lanka", district: "Badulla", rating: 4.6, reviews: 120, image: "/images/places/sorabora-wewa.jpg", images: ["/images/places/sorabora-wewa.jpg"], distance: "67km" },
+          { _id: "18", name: "Maduru Oya National Park", category: "Nature", location: "Mahiyanganaya Border, Sri Lanka", district: "Badulla", rating: 4.7, reviews: 160, image: "/images/places/maduru-oya.jpg", images: ["/images/places/maduru-oya.jpg"], distance: "78km" },
         ]);
       } finally {
         setLoading(false);
