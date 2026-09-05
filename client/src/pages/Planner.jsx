@@ -1830,10 +1830,10 @@ function Planner() {
               : undefined,
           maxHeight: typeof window !== "undefined" && window.innerWidth < 768 ? "82vh" : undefined,
         }}
-        className={`fixed md:absolute right-0 bottom-0 left-0 md:left-auto top-auto md:top-0 z-[1000] w-full md:w-96 md:h-full bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl shadow-2xl border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 rounded-t-[32px] md:rounded-none flex flex-col justify-between overflow-hidden transform transition-all duration-150 ease-out ${
+        className={`fixed md:absolute right-0 bottom-0 left-0 md:left-auto top-auto md:top-0 z-[1000] w-full md:w-96 md:h-full bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl shadow-2xl border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 rounded-t-[32px] md:rounded-none flex flex-col justify-between overflow-hidden transform transition-all duration-200 ease-in-out ${
           !isPanelClosed && (selectedAsset || allOrderedWaypoints.length > 0)
-            ? "translate-y-0 md:translate-x-0"
-            : "translate-y-full md:translate-x-full"
+            ? "translate-y-0 md:translate-x-0 opacity-100 pointer-events-auto"
+            : "translate-y-full md:translate-x-full opacity-0 pointer-events-none hidden"
         }`}
       >
         <div className="flex flex-col h-full justify-between overflow-hidden">
