@@ -832,7 +832,7 @@ function NavigationCenterController({ isNavigating, userLocation }) {
   const map = useMap();
   useEffect(() => {
     if (isNavigating && userLocation && userLocation[0] && userLocation[1]) {
-      map.flyTo(userLocation, 17.5, { animate: true, duration: 1.2 });
+      map.flyTo(userLocation, 17, { animate: true, duration: 1.2 });
     }
   }, [isNavigating, userLocation, map]);
   return null;
