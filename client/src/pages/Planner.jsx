@@ -943,6 +943,7 @@ function Planner() {
   const navigate = useNavigate();
   const [mapAssets, setMapAssets] = useState(ALL_MAP_ASSETS);
   const [selectedAsset, setSelectedAsset] = useState(null);
+  const [isPanelClosed, setIsPanelClosed] = useState(false);
   const [customPoint, setCustomPoint] = useState(null);
 
   // MAP ENGINE STYLE & CATEGORY FILTER STATE
@@ -1377,6 +1378,7 @@ function Planner() {
       showPlanToast(`🚏 Stop #${waypointStops.length + 1} Added: ${prevEnd.name} | 🏁 Destination: ${asset.name}`);
     }
 
+    setIsPanelClosed(false);
     if (window.innerWidth < 768) {
       setSelectedAsset(null);
     } else {
@@ -1467,7 +1469,15 @@ function Planner() {
         <div className="absolute top-4 left-4 z-[1000] flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setSelectedAsset(selectedAsset ? null : (startAsset || endAsset || allOrderedWaypoints[0]))}
+            onClick={() => {
+              if (isPanelClosed) {
+                setIsPanelClosed(false);
+              } else if (selectedAsset) {
+                setSelectedAsset(null);
+              } else {
+                setIsPanelClosed(true);
+              }
+            }}
             className="flex items-center gap-2 rounded-full bg-slate-900/90 text-white hover:bg-slate-800 px-4 py-2.5 shadow-2xl backdrop-blur-md border border-slate-700 text-xs font-extrabold transition active:scale-95 cursor-pointer"
           >
             <ListOrdered size={15} className="text-emerald-400" />
@@ -1713,7 +1723,10 @@ function Planner() {
             position={[myLocationPoint.lat, myLocationPoint.lng]}
             icon={getMyLocationMarkerIcon()}
             eventHandlers={{
-              click: () => setSelectedAsset(myLocationPoint),
+              click: () => {
+                setSelectedAsset(myLocationPoint);
+                setIsPanelClosed(false);
+              },
             }}
             zIndexOffset={900}
           >
@@ -1756,7 +1769,10 @@ function Planner() {
               startAsset?.id === customPoint.id ? "🚩" : endAsset?.id === customPoint.id ? "🏁" : null
             )}
             eventHandlers={{
-              click: () => setSelectedAsset(customPoint),
+              click: () => {
+                setSelectedAsset(customPoint);
+                setIsPanelClosed(false);
+              },
             }}
           >
             <Tooltip direction="top" offset={[0, -32]}>
@@ -1795,10 +1811,13 @@ function Planner() {
       </MapContainer>
 
       {/* MOBILE BACKDROP OVERLAY — Tapping backdrop closes panel so user can tap map */}
-      {selectedAsset && (
+      {selectedAsset && !isPanelClosed && (
         <div
           className="fixed inset-0 bg-black/40 backdrop-blur-xs md:hidden z-[999]"
-          onClick={() => setSelectedAsset(null)}
+          onClick={() => {
+            setSelectedAsset(null);
+            setIsPanelClosed(true);
+          }}
         />
       )}
 
@@ -1806,13 +1825,13 @@ function Planner() {
       <div
         style={{
           height:
-            typeof window !== "undefined" && window.innerWidth < 768 && (selectedAsset || allOrderedWaypoints.length > 0)
+            typeof window !== "undefined" && window.innerWidth < 768 && !isPanelClosed && (selectedAsset || allOrderedWaypoints.length > 0)
               ? `${sheetPercent}vh`
               : undefined,
           maxHeight: typeof window !== "undefined" && window.innerWidth < 768 ? "82vh" : undefined,
         }}
         className={`fixed md:absolute right-0 bottom-0 left-0 md:left-auto top-auto md:top-0 z-[1000] w-full md:w-96 md:h-full bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl shadow-2xl border-t md:border-t-0 md:border-l border-slate-200 dark:border-slate-800 rounded-t-[32px] md:rounded-none flex flex-col justify-between overflow-hidden transform transition-all duration-150 ease-out ${
-          selectedAsset || allOrderedWaypoints.length > 0
+          !isPanelClosed && (selectedAsset || allOrderedWaypoints.length > 0)
             ? "translate-y-0 md:translate-x-0"
             : "translate-y-full md:translate-x-full"
         }`}
@@ -1842,6 +1861,7 @@ function Planner() {
                 type="button"
                 onClick={() => {
                   setSelectedAsset(null);
+                  setIsPanelClosed(true);
                   setSheetPercent(15);
                 }}
                 className="flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/80 px-2 py-1 text-[11px] sm:text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:bg-emerald-100 transition border border-emerald-200/60 dark:border-emerald-800/40"
@@ -1857,6 +1877,7 @@ function Planner() {
                   e.stopPropagation();
                   e.preventDefault();
                   setSelectedAsset(null);
+                  setIsPanelClosed(true);
                   setSheetPercent(15);
                 }}
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 hover:bg-rose-200 transition shrink-0 cursor-pointer border border-rose-300 dark:border-rose-800"
