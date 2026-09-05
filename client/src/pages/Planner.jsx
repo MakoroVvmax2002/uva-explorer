@@ -31,6 +31,7 @@ import {
   Loader2,
   Volume2,
   VolumeX,
+  Mic,
   AlertTriangle,
   Square,
   Locate,
@@ -990,6 +991,34 @@ function Planner() {
   const [voiceMuted, setVoiceMuted] = useState(false);
   const [navInstruction, setNavInstruction] = useState("");
   const [lastSpokenTime, setLastSpokenTime] = useState(0);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [availableVoices, setAvailableVoices] = useState([]);
+  const [selectedVoiceURI, setSelectedVoiceURI] = useState(() => {
+    try {
+      return localStorage.getItem("uva_nav_voice_uri") || "";
+    } catch (e) {
+      return "";
+    }
+  });
+
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+
+    const loadVoices = () => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices && voices.length > 0) {
+        setAvailableVoices(voices);
+      }
+    };
+
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    return () => {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+    };
+  }, []);
 
   // TOP FLOATING TOAST FEEDBACK FOR AUTOMATIC MAP CLICKS
   const [planToast, setPlanToast] = useState("");
@@ -1148,22 +1177,53 @@ function Planner() {
     return voices[0] || null;
   };
 
+  const handleSelectVoice = (voice) => {
+    const uri = voice.voiceURI || voice.name;
+    setSelectedVoiceURI(uri);
+    try {
+      localStorage.setItem("uva_nav_voice_uri", uri);
+    } catch (e) {}
+
+    // Play immediate audio preview
+    if ("speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const firstName = voice.name.split(" ")[0] || "Guide";
+        const sampleText = `Hello! Navigation voice guide set to ${firstName}.`;
+        const utterance = new SpeechSynthesisUtterance(sampleText);
+        utterance.voice = voice;
+        utterance.lang = voice.lang;
+        utterance.rate = 0.98;
+        utterance.pitch = 1.1;
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {}
+    }
+  };
+
   const speakVoiceNotice = (text) => {
     if (voiceMuted || !("speechSynthesis" in window)) return;
     try {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      
-      const femaleVoice = getFemaleVoice();
-      if (femaleVoice) {
-        utterance.voice = femaleVoice;
-        utterance.lang = femaleVoice.lang;
+      const allVoices = window.speechSynthesis.getVoices();
+
+      let chosenVoice = null;
+      if (selectedVoiceURI) {
+        chosenVoice = allVoices.find((v) => (v.voiceURI || v.name) === selectedVoiceURI);
+      }
+      if (!chosenVoice) {
+        chosenVoice = getFemaleVoice();
+      }
+
+      if (chosenVoice) {
+        utterance.voice = chosenVoice;
+        utterance.lang = chosenVoice.lang;
       } else {
         utterance.lang = "en-US";
       }
 
       utterance.rate = 0.98;
-      utterance.pitch = 1.25; // Pitch tuned for female voice tone
+      utterance.pitch = 1.1;
       window.speechSynthesis.speak(utterance);
     } catch (e) {
       console.warn("Speech Synthesis warning:", e);
@@ -1638,7 +1698,18 @@ function Planner() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                {/* GUIDE VOICE PICKER BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => setShowVoiceModal(true)}
+                  className="flex items-center gap-1 px-2.5 py-2 rounded-xl bg-slate-800 text-teal-300 border border-slate-700 hover:bg-slate-700 text-xs font-black transition cursor-pointer"
+                  title="Change Guide Voice"
+                >
+                  <Mic size={16} />
+                  <span className="hidden sm:inline">Voice</span>
+                </button>
+
                 {/* VOICE MUTE TOGGLE */}
                 <button
                   type="button"
@@ -2119,6 +2190,23 @@ function Planner() {
                 </button>
               </div>
 
+              {/* NAVIGATION VOICE GUIDE SELECTOR BUTTON */}
+              <div className="mt-2.5 pt-2 border-t border-slate-200/60 dark:border-slate-700/60">
+                <button
+                  type="button"
+                  onClick={() => setShowVoiceModal(true)}
+                  className="w-full flex items-center justify-between rounded-xl bg-white dark:bg-slate-900 px-3 py-2 text-xs font-black text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition border border-slate-200/80 dark:border-slate-700 shadow-2xs cursor-pointer"
+                >
+                  <div className="flex items-center gap-2">
+                    <Mic size={14} className="text-teal-600 dark:text-teal-400" />
+                    <span>🎙️ Guide Voice</span>
+                  </div>
+                  <span className="text-[11px] font-extrabold text-teal-600 dark:text-teal-400 truncate max-w-[130px]">
+                    {availableVoices.find((v) => (v.voiceURI || v.name) === selectedVoiceURI)?.name?.split(" ")[0] || "Female Voice"} ⚙️
+                  </span>
+                </button>
+              </div>
+
               {/* DISTANCE & DURATION STATS SUMMARY */}
               {roadRoutes.length > 0 ? (
                 <div className="mt-2.5 grid grid-cols-2 gap-2 rounded-xl bg-white p-2.5 border border-slate-200/80 dark:bg-slate-900 dark:border-slate-700">
@@ -2330,6 +2418,85 @@ function Planner() {
           </div>
         </div>
       </div>
+
+      {/* GUIDE VOICE SELECTOR MODAL DIALOG */}
+      {showVoiceModal && (
+        <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 p-6 shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col max-h-[85vh] overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-50 text-teal-600 dark:bg-teal-950/80 dark:text-teal-400">
+                  <Mic size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white">
+                    Select Navigation Voice
+                  </h3>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    Choose your turn-by-turn voice guide
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowVoiceModal(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 hover:bg-slate-200 transition cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 space-y-2 pr-1">
+              {availableVoices.length === 0 ? (
+                <div className="text-center py-8 text-xs font-bold text-slate-500">
+                  No TTS voices detected on your browser. Default system voice will be used.
+                </div>
+              ) : (
+                availableVoices
+                  .filter((v) => v.lang.startsWith("en") || v.lang.startsWith("si") || v.lang.startsWith("ta"))
+                  .concat(availableVoices.filter((v) => !v.lang.startsWith("en") && !v.lang.startsWith("si") && !v.lang.startsWith("ta")))
+                  .map((voice, idx) => {
+                    const isSelected = (voice.voiceURI || voice.name) === selectedVoiceURI;
+                    return (
+                      <button
+                        key={`voice-${idx}-${voice.name}`}
+                        type="button"
+                        onClick={() => handleSelectVoice(voice)}
+                        className={`w-full flex items-center justify-between p-3.5 rounded-2xl border text-left transition cursor-pointer ${
+                          isSelected
+                            ? "bg-teal-50 border-teal-500 text-teal-900 dark:bg-teal-950/70 dark:border-teal-400 dark:text-teal-100 shadow-sm"
+                            : "bg-slate-50 border-slate-200 text-slate-700 dark:bg-slate-800/60 dark:border-slate-700/60 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        }`}
+                      >
+                        <div className="truncate pr-2">
+                          <div className="text-xs font-black truncate">{voice.name}</div>
+                          <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                            Language: {voice.lang} {voice.default ? "(System Default)" : ""}
+                          </div>
+                        </div>
+                        {isSelected && (
+                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-teal-600 text-white dark:bg-teal-400 dark:text-slate-950 font-black text-xs">
+                            ✓
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })
+              )}
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowVoiceModal(false)}
+                className="w-full rounded-2xl bg-teal-600 py-3 text-xs font-black text-white hover:bg-teal-700 transition shadow-md cursor-pointer"
+              >
+                Save & Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
