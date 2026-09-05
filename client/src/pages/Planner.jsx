@@ -889,21 +889,40 @@ function MapClickHandler({ onMapClick }) {
 // Custom Pure Vertical Zoom Slider Component (Clamped to 10x Min and 17x Max Limits)
 function ZoomSliderControl() {
   const map = useMap();
-  const [zoomLevel, setZoomLevel] = useState(map.getZoom());
+  const [zoomLevel, setZoomLevel] = useState(() => Math.min(Math.max(map.getZoom() || 11, 10), 17));
 
   useEffect(() => {
     map.setMinZoom(10);
     map.setMaxZoom(17);
-    const handleZoom = () => setZoomLevel(map.getZoom());
-    map.on("zoomend", handleZoom);
-    return () => map.off("zoomend", handleZoom);
+
+    const enforceZoomLimits = () => {
+      const current = map.getZoom();
+      if (current > 17) {
+        map.setZoom(17, { animate: false });
+        setZoomLevel(17);
+      } else if (current < 10) {
+        map.setZoom(10, { animate: false });
+        setZoomLevel(10);
+      } else {
+        setZoomLevel(current);
+      }
+    };
+
+    map.on("zoom zoomend zoomlevelschange move moveend", enforceZoomLimits);
+    enforceZoomLimits();
+
+    return () => {
+      map.off("zoom zoomend zoomlevelschange move moveend", enforceZoomLimits);
+    };
   }, [map]);
 
   const handleSliderChange = (e) => {
-    const newZoom = Number(e.target.value);
+    const newZoom = Math.min(Math.max(Number(e.target.value), 10), 17);
     map.setZoom(newZoom);
     setZoomLevel(newZoom);
   };
+
+  const safeZoom = Math.min(Math.max(Math.round(zoomLevel), 10), 17);
 
   return (
     <div className="absolute top-4 left-4 z-[1000] flex flex-col items-center bg-slate-900/95 text-white p-2.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700 space-y-2 select-none">
@@ -919,10 +938,10 @@ function ZoomSliderControl() {
           min="10"
           max="17"
           step="1"
-          value={Math.round(zoomLevel)}
+          value={safeZoom}
           onChange={handleSliderChange}
           className="h-24 w-2 accent-emerald-400 bg-slate-800 rounded-full cursor-pointer appearance-none [writing-mode:vertical-lr] [direction:rtl] hover:accent-emerald-300 transition"
-          title={`Zoom Level: ${Math.round(zoomLevel)}x (Min: 10x, Max: 17x)`}
+          title={`Zoom Level: ${safeZoom}x (Min: 10x, Max: 17x)`}
         />
       </div>
 
@@ -933,7 +952,7 @@ function ZoomSliderControl() {
 
       {/* CURRENT ZOOM READOUT BADGE */}
       <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30">
-        {Math.round(zoomLevel)}x
+        {safeZoom}x
       </span>
     </div>
   );
