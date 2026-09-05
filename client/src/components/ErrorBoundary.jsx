@@ -25,14 +25,15 @@ class ErrorBoundary extends React.Component {
       }
       if ("caches" in window) {
         const keys = await caches.keys();
-        for (let key of keys) {
-          await caches.delete(key);
-        }
+        await Promise.all(keys.map((key) => caches.delete(key)));
       }
+      sessionStorage.clear();
     } catch (e) {
       console.error("Failed to clear cache:", e);
     }
-    window.location.href = window.location.pathname + "?t=" + Date.now();
+    const url = new URL(window.location.href);
+    url.searchParams.set("t", Date.now().toString());
+    window.location.href = url.toString();
   };
 
   handleGoHome = () => {
