@@ -54,8 +54,8 @@ const MAP_TILE_CONFIGS = {
       ? `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
       : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
     subdomains: [],
-    maxZoom: 17,
-    maxNativeZoom: 17,
+    maxZoom: 16,
+    maxNativeZoom: 16,
     attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   },
   maptiler_hybrid: {
@@ -64,8 +64,8 @@ const MAP_TILE_CONFIGS = {
       ? `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`
       : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     subdomains: [],
-    maxZoom: 17,
-    maxNativeZoom: 17,
+    maxZoom: 16,
+    maxNativeZoom: 16,
     attribution: '&copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   },
   weather_radar: {
@@ -74,8 +74,8 @@ const MAP_TILE_CONFIGS = {
       ? `https://api.maptiler.com/maps/outdoor-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`
       : "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
     subdomains: "abc",
-    maxZoom: 17,
-    maxNativeZoom: 17,
+    maxZoom: 16,
+    maxNativeZoom: 16,
     attribution: '&copy; Live Weather Radar & Forecast &copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a>',
   },
 };
@@ -832,7 +832,7 @@ function NavigationCenterController({ isNavigating, userLocation }) {
   const map = useMap();
   useEffect(() => {
     if (isNavigating && userLocation && userLocation[0] && userLocation[1]) {
-      map.flyTo(userLocation, 17, { animate: true, duration: 1.2 });
+      map.flyTo(userLocation, 16, { animate: true, duration: 1.2 });
     }
   }, [isNavigating, userLocation, map]);
   return null;
@@ -886,20 +886,20 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-// Custom Pure Vertical Zoom Slider Component (Clamped to 10x Min and 17x Max Limits)
+// Custom Pure Vertical Zoom Slider Component (Clamped to 10x Min and 16x Max Limits)
 function ZoomSliderControl() {
   const map = useMap();
-  const [zoomLevel, setZoomLevel] = useState(() => Math.min(Math.max(map.getZoom() || 11, 10), 17));
+  const [zoomLevel, setZoomLevel] = useState(() => Math.min(Math.max(map.getZoom() || 11, 10), 16));
 
   useEffect(() => {
     map.setMinZoom(10);
-    map.setMaxZoom(17);
+    map.setMaxZoom(16);
 
     const enforceZoomLimits = () => {
       const current = map.getZoom();
-      if (current > 17) {
-        map.setZoom(17, { animate: false });
-        setZoomLevel(17);
+      if (current > 16) {
+        map.setZoom(16, { animate: false });
+        setZoomLevel(16);
       } else if (current < 10) {
         map.setZoom(10, { animate: false });
         setZoomLevel(10);
@@ -917,18 +917,18 @@ function ZoomSliderControl() {
   }, [map]);
 
   const handleSliderChange = (e) => {
-    const newZoom = Math.min(Math.max(Number(e.target.value), 10), 17);
+    const newZoom = Math.min(Math.max(Number(e.target.value), 10), 16);
     map.setZoom(newZoom);
     setZoomLevel(newZoom);
   };
 
-  const safeZoom = Math.min(Math.max(Math.round(zoomLevel), 10), 17);
+  const safeZoom = Math.min(Math.max(Math.round(zoomLevel), 10), 16);
 
   return (
     <div className="absolute top-4 left-4 z-[1000] flex flex-col items-center bg-slate-900/95 text-white p-2.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700 space-y-2 select-none">
       {/* MAX ZOOM INDICATOR ICON */}
       <span className="text-[10px] font-black text-amber-400 uppercase tracking-tighter">
-        17x Max
+        16x Max
       </span>
 
       {/* PURE VERTICAL SLIDER RANGE TRACK */}
@@ -936,12 +936,12 @@ function ZoomSliderControl() {
         <input
           type="range"
           min="10"
-          max="17"
+          max="16"
           step="1"
           value={safeZoom}
           onChange={handleSliderChange}
           className="h-24 w-2 accent-emerald-400 bg-slate-800 rounded-full cursor-pointer appearance-none [writing-mode:vertical-lr] [direction:rtl] hover:accent-emerald-300 transition"
-          title={`Zoom Level: ${safeZoom}x (Min: 10x, Max: 17x)`}
+          title={`Zoom Level: ${safeZoom}x (Min: 10x, Max: 16x)`}
         />
       </div>
 
@@ -1688,8 +1688,8 @@ function Planner() {
         </button>
       </div>
 
-      {/* 100% FULL-SCREEN LEAFLET MAP WITH STRICT 10x - 17x ZOOM LIMIT */}
-      <MapContainer center={DEFAULT_CENTER} zoom={11} minZoom={10} maxZoom={17} zoomControl={false} scrollWheelZoom={true} className="h-full w-full">
+      {/* 100% FULL-SCREEN LEAFLET MAP WITH STRICT 10x - 16x ZOOM LIMIT */}
+      <MapContainer center={DEFAULT_CENTER} zoom={11} minZoom={10} maxZoom={16} zoomControl={false} scrollWheelZoom={true} className="h-full w-full">
         <TileLayer
           key={`tile-${mapStyle}`}
           url={MAP_TILE_CONFIGS[mapStyle].url}
@@ -1705,15 +1705,15 @@ function Planner() {
             <TileLayer
               key="satellite-roads-overlay"
               url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}"
-              maxZoom={17}
-              maxNativeZoom={17}
+              maxZoom={16}
+              maxNativeZoom={16}
               opacity={0.95}
             />
             <TileLayer
               key="satellite-places-overlay"
               url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
-              maxZoom={17}
-              maxNativeZoom={17}
+              maxZoom={16}
+              maxNativeZoom={16}
               opacity={0.95}
             />
           </>
@@ -1724,8 +1724,8 @@ function Planner() {
           <TileLayer
             key="weather-rain-radar-overlay"
             url="https://tile.cache.rainviewer.com/v2/radar/nowcast/256/{z}/{x}/{y}/2/1_1.png"
-            maxZoom={17}
-            maxNativeZoom={17}
+            maxZoom={16}
+            maxNativeZoom={16}
             opacity={0.8}
           />
         )}
