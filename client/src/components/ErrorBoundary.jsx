@@ -15,8 +15,24 @@ class ErrorBoundary extends React.Component {
     console.error("Uva Explorer Application Error caught by ErrorBoundary:", error, errorInfo);
   }
 
-  handleReload = () => {
-    window.location.reload();
+  handleReload = async () => {
+    try {
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let registration of registrations) {
+          await registration.unregister();
+        }
+      }
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        for (let key of keys) {
+          await caches.delete(key);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to clear cache:", e);
+    }
+    window.location.href = window.location.pathname + "?t=" + Date.now();
   };
 
   handleGoHome = () => {
