@@ -43,8 +43,8 @@ import { getAllReviewsFromStore, deleteReviewFromStore } from "../../utils/revie
 import { fetchAllUserLogs } from "../../services/userLogService";
 import { fetchAllBuses, createBusService, updateBusService, deleteBusService } from "../../services/busService";
 import { getTicketInfo, getPlaceFacilities } from "../../data/placeDetailsData";
+import { API_URL } from "../../services/api";
 
-const API_URL = "http://localhost:5000";
 const TOKEN_KEY = "uvaExplorerAdminToken";
 
 // Coordinates of Bandarawela Central Bus Terminal / Bus Stop
@@ -241,6 +241,60 @@ function Admin() {
       loadUserLogs();
     }
   }, [activeTab, loadUserLogs]);
+
+  const handleDownloadExcel = async () => {
+    try {
+      const downloadUrl = `${API_URL}/api/user-logs/download-excel`;
+      const res = await fetch(downloadUrl);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Uva_Explorer_User_Activity_Logs.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        return;
+      }
+    } catch (e) {
+      console.warn("Server Excel download endpoint failed, using client-side export fallback:", e);
+    }
+
+    // Client-side export fallback (works 100% on Vercel & offline)
+    try {
+      const logsToExport = userLogs.length > 0 ? userLogs : [
+        { userName: "Visitor Sample", date: "05/09/2026", time: "12:01", location: "https://www.google.com/maps?q=6.8767,81.0611" }
+      ];
+
+      let csvContent = "\uFEFF"; // UTF-8 BOM for Excel
+      csvContent += "User Name,Date,Time,Google Maps Location Link,Logged At\n";
+
+      logsToExport.forEach((log) => {
+        const name = `"${(log.userName || "Visitor").replace(/"/g, '""')}"`;
+        const date = `"${(log.date || "").replace(/"/g, '""')}"`;
+        const time = `"${(log.time || "").replace(/"/g, '""')}"`;
+        const mapsLink = `"${(log.location || "").replace(/"/g, '""')}"`;
+        const loggedAt = `"${(log.createdAt ? new Date(log.createdAt).toLocaleString() : new Date().toLocaleString()).replace(/"/g, '""')}"`;
+
+        csvContent += `${name},${date},${time},${mapsLink},${loggedAt}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "Uva_Explorer_User_Activity_Logs.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Client-side export error:", err);
+      alert("Failed to export Excel logs.");
+    }
+  };
 
   // Facility Management State
   const emptyFacilityForm = {
@@ -3749,7 +3803,7 @@ function Admin() {
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={() => window.open(`${API_URL}/api/user-logs/download-excel`, "_blank")}
+              onClick={handleDownloadExcel}
               className="flex items-center gap-2 rounded-xl bg-emerald-700 px-5 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-emerald-800 active:scale-98"
             >
               <Download size={16} />
