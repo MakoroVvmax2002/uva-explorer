@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { API_URL } from "../services/api";
+import { useToast } from "../context/ToastContext";
 
 const SETTINGS_KEY = "uvaExplorerSettings";
 
@@ -53,6 +54,7 @@ const DEFAULT_CURATED_PLACES = [
 ];
 
 function Explore() {
+  const { showToast } = useToast();
   const [searchParams] = useSearchParams();
   const [places, setPlaces] = useState(DEFAULT_CURATED_PLACES);
 
@@ -344,7 +346,7 @@ function Explore() {
   ]);
 
   // Manage saved places state
-  function toggleSaved(id) {
+  function toggleSaved(id, placeName = "Destination") {
     setSaved((current) => {
       let updated;
 
@@ -353,11 +355,13 @@ function Explore() {
           (placeId) =>
             placeId !== id
         );
+        showToast(`Removed ${placeName} from your saved list`, "info");
       } else {
         updated = [
           ...current,
           id,
         ];
+        showToast(`Saved ${placeName} to your collection!`, "success");
       }
 
       localStorage.setItem(

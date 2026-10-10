@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Heart, MapPin, Star, Trash2, Map, CalendarPlus } from "lucide-react";
 import { API_URL } from "../services/api";
+import { useToast } from "../context/ToastContext";
 
 const SAMPLE_PLACES_FALLBACK = [
   { _id: "1", id: "1", name: "Nine Arches Bridge", category: "Sightseeing", location: "Gotuwala, Demodara, Ella, Sri Lanka", district: "Badulla", rating: 4.9, reviews: 312, description: "Iconic colonial-era stone train viaduct surrounded by lush jungle.", image: "/images/places/nine-arches-bridge.jpg" },
@@ -12,6 +13,7 @@ const SAMPLE_PLACES_FALLBACK = [
 ];
 
 function Saved() {
+  const { showToast } = useToast();
   const [savedIds, setSavedIds] = useState([]);
   const [places, setPlaces] = useState(SAMPLE_PLACES_FALLBACK);
   const [loading, setLoading] = useState(true);
@@ -49,10 +51,11 @@ function Saved() {
 
   const savedPlaces = places.filter((p) => savedIds.includes((p._id || p.id).toString()));
 
-  const handleRemoveSaved = (id) => {
+  const handleRemoveSaved = (id, name) => {
     const updated = savedIds.filter((savedId) => savedId.toString() !== id.toString());
     setSavedIds(updated);
     localStorage.setItem("uva_saved_places", JSON.stringify(updated));
+    showToast(`Removed ${name || "place"} from saved places`, "info");
   };
 
   return (
@@ -88,7 +91,7 @@ function Saved() {
                   }}
                 />
                 <button
-                  onClick={() => handleRemoveSaved(place._id || place.id)}
+                  onClick={() => handleRemoveSaved(place._id || place.id, place.name)}
                   className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-rose-500 shadow-md transition hover:bg-white hover:scale-110 dark:bg-slate-900/90 dark:text-rose-400"
                   title="Remove from saved"
                 >

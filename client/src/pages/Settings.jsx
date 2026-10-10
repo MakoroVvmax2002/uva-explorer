@@ -15,6 +15,7 @@ import {
   UserCheck,
   Cpu,
 } from "lucide-react";
+import { useToast } from "../context/ToastContext";
 
 const DEFAULT_SETTINGS = {
   siteName: "Uva Explorer",
@@ -56,6 +57,7 @@ function applyTheme(theme) {
 ============================================================ */
 
 function Settings() {
+  const { showToast } = useToast();
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState(false);
 
@@ -147,12 +149,14 @@ function Settings() {
       applyTheme(settings.theme);
 
       setSaved(true);
+      showToast("Application settings saved successfully!", "success");
 
       setTimeout(() => {
         setSaved(false);
       }, 3000);
     } catch (error) {
       console.error("Unable to save settings:", error);
+      showToast("Failed to save settings", "error");
     }
   };
 
@@ -175,6 +179,7 @@ function Settings() {
     );
 
     applyTheme(DEFAULT_SETTINGS.theme);
+    showToast("Settings reset to default preferences", "info");
 
     setSaved(true);
 
