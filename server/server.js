@@ -34,6 +34,7 @@ async function connectDB() {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 30000,
+      dbName: process.env.DB_NAME || "uva_explorer",
     };
     cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((m) => m);
   }
