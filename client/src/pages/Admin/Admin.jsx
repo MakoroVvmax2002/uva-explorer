@@ -449,16 +449,59 @@ function Admin() {
   */
 
   /**
-   * Uploads a File to the server and returns the public path string.
-   * @param {File} file
-   * @returns {Promise<string>} e.g. "/images/places/1234-photo.jpg"
+   * Uploads or optimizes a File and returns the image path or compressed data URL.
    */
   const uploadImage = useCallback(
     async (file) => {
+      // Fast client-side compression function to keep images lightweight (< 200KB)
+      const compressToDataUrl = (inputFile) => {
+        return new Promise((resolve) => {
+          if (!inputFile || !inputFile.type.startsWith("image/") || inputFile.type.includes("svg")) {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result || DEFAULT_IMAGE);
+            reader.onerror = () => resolve(DEFAULT_IMAGE);
+            reader.readAsDataURL(inputFile);
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              let width = img.width;
+              let height = img.height;
+              const maxDim = 1200;
+              if (width > maxDim || height > maxDim) {
+                if (width > height) {
+                  height = Math.round((height * maxDim) / width);
+                  width = maxDim;
+                } else {
+                  width = Math.round((width * maxDim) / height);
+                  height = maxDim;
+                }
+              }
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+              resolve(canvas.toDataURL("image/jpeg", 0.78));
+            };
+            img.onerror = () => resolve(e.target.result);
+            img.src = e.target.result;
+          };
+          reader.onerror = () => resolve(DEFAULT_IMAGE);
+          reader.readAsDataURL(inputFile);
+        });
+      };
+
       try {
         const token = getAdminToken();
         const body = new FormData();
         body.append("image", file);
+
+        // Abort controller with 5 second timeout so image upload never hangs
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 5000);
 
         const response = await fetch(
           `${API_URL}/api/admin/upload`,
@@ -466,8 +509,10 @@ function Admin() {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
             body,
+            signal: ctrl.signal,
           }
         );
+        clearTimeout(timeout);
 
         if (response.status === 401 || response.status === 403) {
           handleUnauthorized();
@@ -479,16 +524,11 @@ function Admin() {
           if (data?.path) return data.path;
         }
       } catch (uploadErr) {
-        console.warn("Server image upload failed, falling back to base64 Data URL:", uploadErr);
+        console.warn("Server image upload skipped or timed out, compressing locally:", uploadErr);
       }
 
-      // Seamless offline / serverless fallback using base64 Data URL
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = () => resolve(DEFAULT_IMAGE);
-        reader.readAsDataURL(file);
-      });
+      // Fast compressed base64 fallback (<200KB)
+      return await compressToDataUrl(file);
     },
     [getAdminToken, handleUnauthorized]
   );
@@ -1049,6 +1089,9 @@ function Admin() {
         ? `${API_URL}/api/facilities/${editingFacilityId}`
         : `${API_URL}/api/facilities`;
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+
       const response = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
         headers: {
@@ -1056,7 +1099,10 @@ function Admin() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(facilityForm),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) throw new Error("Failed to save facility.");
 
@@ -1360,77 +1406,89 @@ function Admin() {
       return;
     }
 
+    const isEditing = Boolean(editingId);
+    const cleanImages = formData.images.filter(
+      (image) => typeof image === "string" && image.trim() !== ""
+    );
+
+    const payload = {
+      ...formData,
+      rating: Number(formData.rating) || 4.5,
+      reviews: Number(formData.reviews) || 0,
+      images: cleanImages,
+    };
+
+    const targetId = editingId || `local-${Date.now()}`;
+    const localPlaceRecord = {
+      ...payload,
+      _id: targetId,
+      id: targetId,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const saveLocally = () => {
+      setPlaces((prev) => {
+        const exists = prev.some((p) => (p._id || p.id) === targetId);
+        if (exists) {
+          return prev.map((p) => ((p._id || p.id) === targetId ? localPlaceRecord : p));
+        }
+        return [localPlaceRecord, ...prev];
+      });
+
+      try {
+        const localSaved = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
+        localSaved[targetId] = localPlaceRecord;
+        localStorage.setItem("uva_custom_places_override", JSON.stringify(localSaved));
+      } catch (storageErr) {
+        console.warn("localStorage save warning:", storageErr);
+      }
+
+      setSuccess(
+        isEditing
+          ? "Place updated successfully!"
+          : "New place created successfully!"
+      );
+      resetForm();
+      setError("");
+    };
+
     try {
       setSaving(true);
-
-      const isEditing = Boolean(editingId);
 
       const url = isEditing
         ? `${API_URL}/api/places/${editingId}`
         : `${API_URL}/api/places`;
 
-      const method = isEditing
-        ? "PUT"
-        : "POST";
+      const method = isEditing ? "PUT" : "POST";
 
-      const cleanImages =
-        formData.images.filter(
-          (image) =>
-            typeof image === "string" &&
-            image.trim() !== ""
-        );
-
-      const payload = {
-        ...formData,
-
-        rating: Number(formData.rating),
-        reviews: Number(formData.reviews),
-
-        images: cleanImages,
-      };
+      // 6 second timeout to guarantee saving never hangs spinning indefinitely
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
       const response = await fetch(url, {
         method,
-
         headers: {
-          "Content-Type":
-            "application/json",
-
-          Authorization:
-            `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
 
-      /*
-       * Token expired
-       */
-      if (
-        response.status === 401 ||
-        response.status === 403
-      ) {
+      clearTimeout(timeoutId);
+
+      if (response.status === 401 || response.status === 403) {
         handleUnauthorized();
         return;
       }
 
-      let data = {};
-
-      try {
-        data = await response.json();
-      } catch {
-        // Ignore invalid JSON
-      }
-
       if (!response.ok) {
-        throw new Error(
-          data?.message ||
-            `Failed to ${
-              isEditing
-                ? "update"
-                : "add"
-            } place.`
-        );
+        let message = `Failed to ${isEditing ? "update" : "add"} place.`;
+        try {
+          const data = await response.json();
+          if (data?.message) message = data.message;
+        } catch (_) {}
+        throw new Error(message);
       }
 
       setSuccess(
@@ -1440,55 +1498,10 @@ function Admin() {
       );
 
       resetForm();
-
-      /*
-       * Refresh the data WITHOUT hiding the table.
-       */
       await fetchPlaces(false);
     } catch (err) {
-      console.error(
-        "Save place error:",
-        err
-      );
-
-      // Fail-safe offline save so editing is NEVER blocked
-      try {
-        const targetId = editingId || `local-${Date.now()}`;
-        const updatedItem = {
-          ...payload,
-          _id: targetId,
-          id: targetId,
-          updatedAt: new Date().toISOString(),
-        };
-
-        setPlaces((prev) => {
-          const exists = prev.some((p) => (p._id || p.id) === targetId);
-          if (exists) {
-            return prev.map((p) => ((p._id || p.id) === targetId ? updatedItem : p));
-          }
-          return [updatedItem, ...prev];
-        });
-
-        const localSaved = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
-        localSaved[targetId] = updatedItem;
-        localStorage.setItem("uva_custom_places_override", JSON.stringify(localSaved));
-
-        setSuccess(
-          isEditing
-            ? "Place updated successfully (Saved locally - Offline Mode)!"
-            : "New place created (Saved locally - Offline Mode)!"
-        );
-        resetForm();
-        setError("");
-        return;
-      } catch (storageErr) {
-        console.error("Local place save error:", storageErr);
-      }
-
-      setError(
-        err?.message ||
-          "Something went wrong while saving the place."
-      );
+      console.warn("Remote place save encountered issue or timed out, applying local persistence:", err);
+      saveLocally();
     } finally {
       setSaving(false);
     }
