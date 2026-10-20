@@ -1375,20 +1375,34 @@ function Planner() {
     });
   };
 
-  // Fetch API Places & Facilities if backend is running
+  // Fetch API Places & Facilities if backend is running, plus local custom places
   useEffect(() => {
     fetch(`${API_URL}/api/places`)
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const formattedApiPlaces = data.map((p, idx) => ({
-            id: `api_p_${p._id || idx}`,
+        let placesList = Array.isArray(data) ? data : [];
+
+        // Merge local custom places
+        try {
+          const overrides = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
+          const customPlaces = Object.values(overrides);
+          if (customPlaces.length > 0) {
+            const map = new Map();
+            placesList.forEach((p) => map.set(p._id || p.id || p.name, p));
+            customPlaces.forEach((p) => map.set(p._id || p.id || p.name, p));
+            placesList = Array.from(map.values());
+          }
+        } catch (_) {}
+
+        if (placesList.length > 0) {
+          const formattedApiPlaces = placesList.map((p, idx) => ({
+            id: p._id || p.id || `api_p_${idx}`,
             name: p.name,
             category: "place",
             subCategory: p.category || "Attraction",
             location: p.location || "Uva Region",
-            lat: p.lat || 6.82977,
-            lng: p.lng || 80.98457,
+            lat: Number(p.lat) || 6.82977,
+            lng: Number(p.lng) || 80.98457,
             image: p.image || "/images/places/nine-arches.jpg",
             description: p.description || "Popular destination in Uva Province.",
             iconType: "place",
@@ -1400,7 +1414,32 @@ function Planner() {
           });
         }
       })
-      .catch((e) => console.warn("API Places warning:", e));
+      .catch((e) => {
+        console.warn("API Places warning, checking local storage:", e);
+        try {
+          const overrides = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
+          const customPlaces = Object.values(overrides);
+          if (customPlaces.length > 0) {
+            const formatted = customPlaces.map((p, idx) => ({
+              id: p._id || p.id || `custom_p_${idx}`,
+              name: p.name,
+              category: "place",
+              subCategory: p.category || "Attraction",
+              location: p.location || "Uva Region",
+              lat: Number(p.lat) || 6.82977,
+              lng: Number(p.lng) || 80.98457,
+              image: p.image || "/images/places/nine-arches.jpg",
+              description: p.description || "",
+              iconType: "place",
+            }));
+            setMapAssets((prev) => {
+              const existingNames = new Set(prev.map((a) => a.name));
+              const newPlaces = formatted.filter((p) => !existingNames.has(p.name));
+              return [...prev, ...newPlaces];
+            });
+          }
+        } catch (_) {}
+      });
   }, []);
 
   // Handle clicking ANYWHERE on the map to add stops sequentially & collapse panel for full map view
@@ -1464,6 +1503,44 @@ function Planner() {
       setSelectedAsset(asset);
     }
   };
+
+  // Auto-add destination from "Add to Trip Plan" (PlaceDetails) or URL query (?add=id)
+  useEffect(() => {
+    let targetToAdd = null;
+    try {
+      const pending = localStorage.getItem("uva_planner_pending_add");
+      if (pending) {
+        targetToAdd = JSON.parse(pending);
+        localStorage.removeItem("uva_planner_pending_add");
+      }
+    } catch (_) {}
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const addId = searchParams.get("add");
+
+    if (targetToAdd) {
+      const asset = {
+        id: targetToAdd._id || targetToAdd.id || `p_${Date.now()}`,
+        name: targetToAdd.name,
+        category: "place",
+        subCategory: targetToAdd.category || "Attraction",
+        location: targetToAdd.location || "Uva Region",
+        lat: Number(targetToAdd.lat) || 6.82977,
+        lng: Number(targetToAdd.lng) || 80.98457,
+        image: targetToAdd.image || "/images/places/nine-arches.jpg",
+        description: targetToAdd.description || "",
+        iconType: "place",
+      };
+      handleSelectAssetAuto(asset);
+    } else if (addId && mapAssets.length > 0) {
+      const found = mapAssets.find(
+        (a) => String(a.id) === String(addId) || (a.name && a.name.toLowerCase() === addId.toLowerCase())
+      );
+      if (found) {
+        handleSelectAssetAuto(found);
+      }
+    }
+  }, [mapAssets]);
 
   // All ordered waypoints for multi-stop road calculation
   const allOrderedWaypoints = useMemo(() => {

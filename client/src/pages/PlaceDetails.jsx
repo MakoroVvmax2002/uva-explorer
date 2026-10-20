@@ -550,6 +550,17 @@ const FALLBACK_PLACES_MAP = {
         }
 
         const searchKey = String(id).toLowerCase();
+
+        // Check local custom places override if not found from API
+        if (!loadedPlace) {
+          try {
+            const overrides = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
+            loadedPlace = overrides[id] || Object.values(overrides).find(
+              (p) => String(p._id) === String(id) || String(p.id) === String(id) || (p.name && p.name.toLowerCase() === searchKey)
+            );
+          } catch (_) {}
+        }
+
         let matchedFallback = FALLBACK_PLACES_MAP[id];
         if (!matchedFallback) {
           const targetName = (loadedPlace?.name || decodeURIComponent(searchKey)).toLowerCase();
@@ -957,21 +968,24 @@ const FALLBACK_PLACES_MAP = {
   function handleAddToTrip() {
     try {
       const activePlannerJson = localStorage.getItem("uva_active_planner_state");
+      let activeState = { places: [] };
       if (activePlannerJson) {
-        const activeState = JSON.parse(activePlannerJson);
-        const existingPlaces = Array.isArray(activeState.places) ? activeState.places : [];
-
-        const isAlreadyAdded = existingPlaces.some((p) => (p._id || p.id) === (place._id || place.id) || p.name === place.name);
-        if (!isAlreadyAdded) {
-          activeState.places = [...existingPlaces, place];
-          localStorage.setItem("uva_active_planner_state", JSON.stringify(activeState));
-        }
+        try { activeState = JSON.parse(activePlannerJson); } catch(_) {}
       }
+      if (!Array.isArray(activeState.places)) activeState.places = [];
+      const pid = place._id || place.id || id;
+      const isAlreadyAdded = activeState.places.some((p) => (p._id || p.id) === pid || p.name === place.name);
+      if (!isAlreadyAdded) {
+        activeState.places = [...activeState.places, place];
+      }
+      localStorage.setItem("uva_active_planner_state", JSON.stringify(activeState));
+      // Save pending place so Planner receives it directly
+      localStorage.setItem("uva_planner_pending_add", JSON.stringify(place));
     } catch (e) {
       console.warn("Failed to append place to active trip:", e);
     }
 
-    navigate(`/planner?add=${encodeURIComponent(id)}`);
+    navigate(`/planner?add=${encodeURIComponent(place._id || place.id || id)}`);
   }
 
   // Determine map coordinates from location name

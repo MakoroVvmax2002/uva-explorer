@@ -1512,10 +1512,14 @@ function Admin() {
 
       resetForm();
       setError("");
+      window.dispatchEvent(new Event("uvaPlacesChanged"));
+      window.dispatchEvent(new Event("storage"));
       await fetchPlaces(false);
     } catch (err) {
       console.warn("Remote place save encountered issue or timed out, applying local persistence:", err);
       saveLocally();
+      window.dispatchEvent(new Event("uvaPlacesChanged"));
+      window.dispatchEvent(new Event("storage"));
     } finally {
       setSaving(false);
     }

@@ -156,17 +156,40 @@ router.delete("/reviews/:reviewId", adminAuth, async (req, res) => {
 // GET single place by ID
 router.get("/:id", async (req, res) => {
   try {
-    const place = await Place.findById(req.params.id).lean();
+    const id = req.params.id;
+    let place = null;
+
+    if (Place.db && Place.db.readyState === 1) {
+      if (mongoose.Types.ObjectId.isValid(id)) {
+        place = await Place.findById(id).lean();
+      }
+      if (!place) {
+        place = await Place.findOne({ $or: [{ id: id }, { name: new RegExp(`^${id}$`, "i") }] }).lean();
+      }
+    }
+
+    if (!place) {
+      place = fallbackData.placesData.find(
+        (p) => String(p._id) === String(id) || String(p.id) === String(id)
+      );
+    }
+
     if (!place) return res.status(404).json({ message: "Place not found" });
 
-    const reviews = await Review.find({ place: req.params.id }, "rating").lean();
-    const count = reviews.length;
-    const avg = count === 0 ? 0 : Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / count) * 10) / 10;
+    let count = 0;
+    let avg = place.rating || 0;
+    if (Place.db && Place.db.readyState === 1 && Review) {
+      try {
+        const reviews = await Review.find({ place: place._id }, "rating").lean();
+        count = reviews.length;
+        avg = count === 0 ? (place.rating || 0) : Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / count) * 10) / 10;
+      } catch (_) {}
+    }
 
     res.json({
       ...place,
-      rating: count > 0 ? avg : 0,
-      reviews: count,
+      rating: count > 0 ? avg : (place.rating || 0),
+      reviews: count || place.reviews || 0,
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch place", error: error.message });

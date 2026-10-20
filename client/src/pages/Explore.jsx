@@ -56,7 +56,18 @@ const DEFAULT_CURATED_PLACES = [
 function Explore() {
   const { showToast } = useToast();
   const [searchParams] = useSearchParams();
-  const [places, setPlaces] = useState(DEFAULT_CURATED_PLACES);
+  const [places, setPlaces] = useState(() => {
+    try {
+      const overrides = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
+      const customPlaces = Object.values(overrides);
+      if (customPlaces.length > 0) {
+        const customNames = new Set(customPlaces.map((p) => p.name.toLowerCase()));
+        const defaultFiltered = DEFAULT_CURATED_PLACES.filter((p) => !customNames.has(p.name.toLowerCase()));
+        return [...customPlaces, ...defaultFiltered];
+      }
+    } catch (_) {}
+    return DEFAULT_CURATED_PLACES;
+  });
 
   // Read ?q= and ?category= from URL (set by Home category cards or Navbar search)
   const [search, setSearch] = useState(() => searchParams.get("q") || "");
@@ -243,17 +254,41 @@ function Explore() {
 
       const data = await response.json();
 
-      const placesData = Array.isArray(data)
+      let placesData = Array.isArray(data)
         ? data
         : Array.isArray(data?.places)
         ? data.places
         : [];
 
+      // Merge with custom overrides from localStorage
+      try {
+        const overrides = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
+        const customPlaces = Object.values(overrides);
+        if (customPlaces.length > 0) {
+          const map = new Map();
+          placesData.forEach((p) => map.set(p._id || p.id || p.name, p));
+          customPlaces.forEach((p) => map.set(p._id || p.id || p.name, p));
+          placesData = Array.from(map.values());
+        }
+      } catch (_) {}
+
       if (placesData.length > 0) {
         setPlaces(placesData);
       }
     } catch (err) {
-      // Silently keep curated places
+      // Silently keep curated places merged with local overrides
+      try {
+        const overrides = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
+        const customPlaces = Object.values(overrides);
+        if (customPlaces.length > 0) {
+          setPlaces((prev) => {
+            const map = new Map();
+            prev.forEach((p) => map.set(p._id || p.id || p.name, p));
+            customPlaces.forEach((p) => map.set(p._id || p.id || p.name, p));
+            return Array.from(map.values());
+          });
+        }
+      } catch (_) {}
     } finally {
       clearTimeout(timeoutId);
       setLoading(false);
@@ -263,6 +298,18 @@ function Explore() {
 
   useEffect(() => {
     fetchPlaces(false);
+
+    const handlePlacesChange = () => {
+      fetchPlaces(false);
+    };
+
+    window.addEventListener("uvaPlacesChanged", handlePlacesChange);
+    window.addEventListener("storage", handlePlacesChange);
+
+    return () => {
+      window.removeEventListener("uvaPlacesChanged", handlePlacesChange);
+      window.removeEventListener("storage", handlePlacesChange);
+    };
   }, []);
 
   // Extract available categories
