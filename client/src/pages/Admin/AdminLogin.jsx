@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LockKeyhole, Eye, EyeOff } from "lucide-react";
+import { API_URL } from "../../services/api";
 
-const API_URL = "http://localhost:5000";
 
 function AdminLogin() {
   const navigate = useNavigate();

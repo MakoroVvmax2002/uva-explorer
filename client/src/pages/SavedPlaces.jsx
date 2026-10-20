@@ -14,8 +14,8 @@ import {
   getSavedPlaces,
   removeSavedPlace,
 } from "../utils/savedPlaces";
+import { API_URL } from "../services/api";
 
-const API_URL = "http://localhost:5000";
 
 function getImageUrl(image) {
   if (!image) {

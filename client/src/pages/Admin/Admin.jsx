@@ -573,16 +573,28 @@ function Admin() {
 
         const data = await response.json();
 
-        if (Array.isArray(data) && data.length > 0) {
-          setPlaces(data);
-        } else {
+        let list = Array.isArray(data) && data.length > 0 ? data : [];
+        if (list.length === 0) {
           throw new Error("Empty backend response");
         }
+
+        try {
+          const overrides = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
+          list = list.map((p) => overrides[p._id || p.id] || p);
+          Object.values(overrides).forEach((item) => {
+            if (!list.some((p) => (p._id || p.id) === (item._id || item.id))) {
+              list.unshift(item);
+            }
+          });
+        } catch (e) {}
+
+        setPlaces(list);
       } catch (err) {
         if (err?.name === "AbortError") {
           return;
         }
         console.error("Fetch places error:", err);
+
 
         // Comprehensive catalog of curated Uva Province destinations if server API is offline
         setPlaces([
@@ -983,12 +995,31 @@ function Admin() {
     try {
       setFacilitiesLoading(true);
       const response = await fetch(`${API_URL}/api/facilities`);
+      let list = [];
       if (response.ok) {
         const data = await response.json();
-        setAdminFacilities(Array.isArray(data) ? data : []);
+        list = Array.isArray(data) ? data : [];
       }
+
+      // Merge local overrides
+      try {
+        const overrides = JSON.parse(localStorage.getItem("uva_custom_facilities_override") || "{}");
+        list = list.map((f) => overrides[f._id || f.id] || f);
+        Object.values(overrides).forEach((item) => {
+          if (!list.some((f) => (f._id || f.id) === (item._id || item.id))) {
+            list.unshift(item);
+          }
+        });
+      } catch (e) {}
+
+      setAdminFacilities(list);
     } catch (err) {
       console.error("Failed to fetch facilities:", err);
+      // Fallback from localStorage
+      try {
+        const overrides = JSON.parse(localStorage.getItem("uva_custom_facilities_override") || "{}");
+        setAdminFacilities(Object.values(overrides));
+      } catch (e) {}
     } finally {
       setFacilitiesLoading(false);
     }
@@ -1025,6 +1056,41 @@ function Admin() {
       setFacilityForm(emptyFacilityForm);
       fetchAdminFacilities();
     } catch (err) {
+      console.error("Facility save error, falling back to local storage:", err);
+      try {
+        const isEdit = !!editingFacilityId;
+        const targetId = editingFacilityId || `fac-local-${Date.now()}`;
+        const updatedFacility = {
+          ...facilityForm,
+          _id: targetId,
+          id: targetId,
+        };
+
+        setAdminFacilities((prev) => {
+          const exists = prev.some((f) => (f._id || f.id) === targetId);
+          if (exists) {
+            return prev.map((f) => ((f._id || f.id) === targetId ? updatedFacility : f));
+          }
+          return [updatedFacility, ...prev];
+        });
+
+        const localSaved = JSON.parse(localStorage.getItem("uva_custom_facilities_override") || "{}");
+        localSaved[targetId] = updatedFacility;
+        localStorage.setItem("uva_custom_facilities_override", JSON.stringify(localSaved));
+
+        setSuccess(
+          isEdit
+            ? "Facility updated successfully (Saved locally - Offline Mode)!"
+            : "Facility added to map (Saved locally - Offline Mode)!"
+        );
+        setEditingFacilityId(null);
+        setFacilityForm(emptyFacilityForm);
+        setError("");
+        return;
+      } catch (storageErr) {
+        console.error("Local facility save error:", storageErr);
+      }
+
       setError(err.message || "Failed to save facility.");
     } finally {
       setSavingFacility(false);
@@ -1051,6 +1117,18 @@ function Admin() {
       setAdminFacilities((prev) => prev.filter((f) => (f._id || f.id) !== facId));
       setSuccess("Facility removed successfully!");
     } catch (err) {
+      console.warn("Server delete facility failed, applying local delete:", err);
+      try {
+        const localSaved = JSON.parse(localStorage.getItem("uva_custom_facilities_override") || "{}");
+        delete localSaved[facId];
+        localStorage.setItem("uva_custom_facilities_override", JSON.stringify(localSaved));
+
+        setAdminFacilities((prev) => prev.filter((f) => (f._id || f.id) !== facId));
+        setSuccess("Facility removed successfully (Offline Mode)!");
+        setError("");
+        return;
+      } catch (e) {}
+
       setError(err.message || "Failed to delete facility.");
     } finally {
       setDeletingFacilityId(null);
@@ -1364,6 +1442,40 @@ function Admin() {
         err
       );
 
+      // Fail-safe offline save so editing is NEVER blocked
+      try {
+        const targetId = editingId || `local-${Date.now()}`;
+        const updatedItem = {
+          ...payload,
+          _id: targetId,
+          id: targetId,
+          updatedAt: new Date().toISOString(),
+        };
+
+        setPlaces((prev) => {
+          const exists = prev.some((p) => (p._id || p.id) === targetId);
+          if (exists) {
+            return prev.map((p) => ((p._id || p.id) === targetId ? updatedItem : p));
+          }
+          return [updatedItem, ...prev];
+        });
+
+        const localSaved = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
+        localSaved[targetId] = updatedItem;
+        localStorage.setItem("uva_custom_places_override", JSON.stringify(localSaved));
+
+        setSuccess(
+          isEditing
+            ? "Place updated successfully (Saved locally - Offline Mode)!"
+            : "New place created (Saved locally - Offline Mode)!"
+        );
+        resetForm();
+        setError("");
+        return;
+      } catch (storageErr) {
+        console.error("Local place save error:", storageErr);
+      }
+
       setError(
         err?.message ||
           "Something went wrong while saving the place."
@@ -1436,17 +1548,10 @@ function Admin() {
         );
       }
 
-      /*
-       * IMPORTANT:
-       * Remove the item immediately from the local list.
-       *
-       * This makes deletion instant and avoids
-       * table flickering.
-       */
       setPlaces((previous) =>
         previous.filter(
           (place) =>
-            place._id !== id
+            (place._id || place.id) !== id
         )
       );
 
@@ -1454,15 +1559,32 @@ function Admin() {
         "Place deleted successfully!"
       );
 
-      /*
-       * Synchronize with database silently.
-       */
       fetchPlaces(false);
     } catch (err) {
       console.error(
         "Delete place error:",
         err
       );
+
+      // Local fallback removal
+      try {
+        const localSaved = JSON.parse(localStorage.getItem("uva_custom_places_override") || "{}");
+        delete localSaved[id];
+        localStorage.setItem("uva_custom_places_override", JSON.stringify(localSaved));
+
+        setPlaces((previous) =>
+          previous.filter(
+            (place) =>
+              (place._id || place.id) !== id
+          )
+        );
+
+        setSuccess(
+          "Place deleted successfully (Offline Mode)!"
+        );
+        setError("");
+        return;
+      } catch (storageErr) {}
 
       setError(
         err?.message ||

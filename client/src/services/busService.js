@@ -1,6 +1,8 @@
 import axios from "axios";
+import { API_URL as BASE_API_URL } from "./api";
 
-const API_URL = "http://localhost:5000/api/buses";
+const API_URL = `${BASE_API_URL}/api/buses`;
+
 
 // Fetch all bus services
 export const fetchAllBuses = async () => {

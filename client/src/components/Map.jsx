@@ -4,6 +4,8 @@ import { MapContainer, TileLayer, Marker, Popup, Circle, Polyline, useMap, useMa
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { fetchRoadRoutes } from "../utils/osrmRoutingUtil";
+import { API_URL } from "../services/api";
+
 import {
   Navigation,
   MapPin,
@@ -509,8 +511,9 @@ function Map() {
 
   // Fetch admin custom facilities from database
   useEffect(() => {
-    fetch("http://localhost:5000/api/facilities")
+    fetch(`${API_URL}/api/facilities`)
       .then((res) => res.json())
+
       .then((data) => {
         if (Array.isArray(data)) {
           const mapped = data.map((f) => ({
