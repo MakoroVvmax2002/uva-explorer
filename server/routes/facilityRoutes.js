@@ -4,13 +4,21 @@ const { adminAuth } = require("../middleware/adminAuth");
 
 const router = express.Router();
 
+const fallbackData = require("../data/fallbackData");
+
 // GET all facilities
 router.get("/", async (req, res) => {
   try {
-    const facilities = await Facility.find().sort({ createdAt: -1 });
-    res.json(facilities);
+    if (Facility.db && Facility.db.readyState === 1) {
+      const facilities = await Facility.find().sort({ createdAt: -1 });
+      if (facilities && facilities.length > 0) {
+        return res.json(facilities);
+      }
+    }
+    return res.json(fallbackData.facilitiesData);
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch facilities", error: err.message });
+    console.warn("Facilities DB query failed, serving fallback:", err.message);
+    return res.json(fallbackData.facilitiesData);
   }
 });
 

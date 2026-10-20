@@ -2,14 +2,21 @@ const express = require("express");
 const router = express.Router();
 const BusService = require("../models/BusService");
 
+const fallbackData = require("../data/fallbackData");
+
 // GET /api/buses - Fetch all bus services
 router.get("/", async (req, res) => {
   try {
-    const buses = await BusService.find().sort({ createdAt: -1 });
-    res.json(buses);
+    if (BusService.db && BusService.db.readyState === 1) {
+      const buses = await BusService.find().sort({ createdAt: -1 });
+      if (buses && buses.length > 0) {
+        return res.json(buses);
+      }
+    }
+    return res.json(fallbackData.busServicesData);
   } catch (error) {
-    console.error("Error fetching bus services:", error.message);
-    res.status(500).json({ error: "Failed to fetch bus services" });
+    console.warn("Bus services DB query failed, serving fallback:", error.message);
+    return res.json(fallbackData.busServicesData);
   }
 });
 

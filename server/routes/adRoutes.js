@@ -5,16 +5,19 @@ const Ad = require("../models/Ad");
 // GET /api/ads/published - Public active published ads for homepage carousel
 router.get("/published", async (req, res) => {
   try {
-    const now = new Date();
-    const ads = await Ad.find({
-      status: "published",
-      $or: [{ expiresAt: { $gt: now } }, { expiresAt: null }],
-    }).sort({ createdAt: -1 });
+    if (Ad.db && Ad.db.readyState === 1) {
+      const now = new Date();
+      const ads = await Ad.find({
+        status: "published",
+        $or: [{ expiresAt: { $gt: now } }, { expiresAt: null }],
+      }).sort({ createdAt: -1 });
 
-    res.json(ads);
+      return res.json(ads);
+    }
+    return res.json([]);
   } catch (error) {
-    console.error("Error fetching published ads:", error);
-    res.status(500).json({ message: "Failed to fetch published ads" });
+    console.warn("Published ads DB query fallback:", error.message);
+    res.json([]);
   }
 });
 

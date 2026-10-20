@@ -67,6 +67,8 @@ router.post("/upload-review-video", videoUpload.single("video"), (req, res) => {
   return res.json({ path: publicPath });
 });
 
+const fallbackData = require("../data/fallbackData");
+
 /* -------------------------------------------------------
    PLACES CRUD
 ------------------------------------------------------- */
@@ -74,43 +76,52 @@ router.post("/upload-review-video", videoUpload.single("video"), (req, res) => {
 // GET all places
 router.get("/", async (req, res) => {
   try {
-    const places = await Place.find().lean();
+    if (Place.db && Place.db.readyState === 1) {
+      const places = await Place.find().lean();
 
-    // Aggregate live ratings and reviews count from Review collection
-    const stats = await Review.aggregate([
-      {
-        $group: {
-          _id: "$place",
-          avgRating: { $avg: "$rating" },
-          count: { $sum: 1 },
-        },
-      },
-    ]);
+      if (places && places.length > 0) {
+        // Aggregate live ratings and reviews count from Review collection
+        const stats = await Review.aggregate([
+          {
+            $group: {
+              _id: "$place",
+              avgRating: { $avg: "$rating" },
+              count: { $sum: 1 },
+            },
+          },
+        ]);
 
-    const statsMap = {};
-    stats.forEach((item) => {
-      if (item._id) {
-        statsMap[item._id.toString()] = {
-          rating: Math.round(item.avgRating * 10) / 10,
-          reviews: item.count,
-        };
+        const statsMap = {};
+        stats.forEach((item) => {
+          if (item._id) {
+            statsMap[item._id.toString()] = {
+              rating: Math.round(item.avgRating * 10) / 10,
+              reviews: item.count,
+            };
+          }
+        });
+
+        const placesWithStats = places.map((place) => {
+          const placeStats = statsMap[place._id.toString()] || { rating: 0, reviews: 0 };
+          return {
+            ...place,
+            rating: placeStats.rating,
+            reviews: placeStats.reviews,
+          };
+        });
+
+        return res.json(placesWithStats);
       }
-    });
+    }
 
-    const placesWithStats = places.map((place) => {
-      const placeStats = statsMap[place._id.toString()] || { rating: 0, reviews: 0 };
-      return {
-        ...place,
-        rating: placeStats.rating,
-        reviews: placeStats.reviews,
-      };
-    });
-
-    res.json(placesWithStats);
+    // Fail-safe: Return curated destinations if DB is cold-starting or disconnected
+    return res.json(fallbackData.places);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch places", error: error.message });
+    console.warn("MongoDB places fetch error, serving curated fallback places:", error.message);
+    return res.json(fallbackData.places);
   }
 });
+
 
 // GET all reviews across all places (for Admin dashboard)
 router.get("/reviews/all", async (req, res) => {
