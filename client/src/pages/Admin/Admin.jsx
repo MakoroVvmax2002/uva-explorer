@@ -1491,6 +1491,19 @@ function Admin() {
         throw new Error(message);
       }
 
+      let savedData = null;
+      try {
+        savedData = await response.json();
+      } catch (_) {}
+
+      if (savedData && (savedData._id || savedData.id)) {
+        const sid = savedData._id || savedData.id;
+        setPlaces((prev) => [
+          savedData,
+          ...prev.filter((p) => (p._id || p.id) !== sid),
+        ]);
+      }
+
       setSuccess(
         isEditing
           ? "Place updated successfully!"
@@ -1498,6 +1511,7 @@ function Admin() {
       );
 
       resetForm();
+      setError("");
       await fetchPlaces(false);
     } catch (err) {
       console.warn("Remote place save encountered issue or timed out, applying local persistence:", err);

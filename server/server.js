@@ -33,35 +33,29 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
+const FALLBACK_MONGO_URI =
+  "mongodb+srv://vishmikarasanjana20020726_db_user:Pi07bVUY8XxNmqTc@cluster1.inbjnqt.mongodb.net/uva_explorer?retryWrites=true&w=majority";
+
 async function connectDB() {
   // If already connected, reuse existing connection
   if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
   }
 
-  const mongoUri = process.env.MONGO_URI;
-  if (!mongoUri) {
-    console.warn("⚠️ MONGO_URI environment variable is not defined");
-    return null;
-  }
-
   const isVercel = Boolean(process.env.VERCEL || process.env.NODE_ENV === "production");
-  const isLocalhost = mongoUri.includes("127.0.0.1") || mongoUri.includes("localhost");
+  let mongoUri = process.env.MONGO_URI;
 
-  // In cloud serverless (Vercel), connecting to 127.0.0.1 will fail because local machine is unreachable.
-  if (isVercel && isLocalhost) {
-    console.warn(
-      "⚠️ MONGO_URI points to localhost/127.0.0.1 on Vercel. Set a cloud MongoDB Atlas URI in Vercel Project Settings."
-    );
-    return null;
+  // On Vercel or when not provided, fallback to production cluster1
+  if (!mongoUri || (isVercel && (mongoUri.includes("127.0.0.1") || mongoUri.includes("localhost")))) {
+    mongoUri = FALLBACK_MONGO_URI;
   }
 
   // If connection dropped or promise was null, initiate connection
   if (!cached.promise || mongoose.connection.readyState === 0) {
     const opts = {
-      bufferCommands: true,
+      bufferCommands: false,
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 8000,
       socketTimeoutMS: 45000,
       dbName: process.env.DB_NAME || "uva_explorer",
     };
