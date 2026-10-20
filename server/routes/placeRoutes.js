@@ -2,6 +2,7 @@ const { adminAuth } = require("../middleware/adminAuth");
 const express = require("express");
 const path = require("path");
 const multer = require("multer");
+const mongoose = require("mongoose");
 const Place = require("../models/Place");
 const Review = require("../models/Review");
 
@@ -174,6 +175,12 @@ router.get("/:id", async (req, res) => {
 
 // POST create place
 router.post("/", adminAuth, async (req, res) => {
+  if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message: "MongoDB database is currently disconnected. Please check MONGO_URI in Vercel settings.",
+      offline: true,
+    });
+  }
   try {
     const newPlace = new Place(req.body);
     const savedPlace = await newPlace.save();
@@ -185,6 +192,12 @@ router.post("/", adminAuth, async (req, res) => {
 
 // PUT update place
 router.put("/:id", adminAuth, async (req, res) => {
+  if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message: "MongoDB database is currently disconnected. Please check MONGO_URI in Vercel settings.",
+      offline: true,
+    });
+  }
   try {
     const updatedPlace = await Place.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updatedPlace) return res.status(404).json({ message: "Place not found" });
@@ -196,6 +209,12 @@ router.put("/:id", adminAuth, async (req, res) => {
 
 // DELETE place
 router.delete("/:id", adminAuth, async (req, res) => {
+  if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message: "MongoDB database is currently disconnected. Please check MONGO_URI in Vercel settings.",
+      offline: true,
+    });
+  }
   try {
     const deletedPlace = await Place.findByIdAndDelete(req.params.id);
     if (!deletedPlace) return res.status(404).json({ message: "Place not found" });

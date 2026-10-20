@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const Facility = require("../models/Facility");
 const { adminAuth } = require("../middleware/adminAuth");
 
@@ -24,6 +25,12 @@ router.get("/", async (req, res) => {
 
 // POST add facility (Admin only)
 router.post("/", adminAuth, async (req, res) => {
+  if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message: "MongoDB database is currently disconnected. Please check MONGO_URI in Vercel settings.",
+      offline: true,
+    });
+  }
   try {
     const { name, type, location, description, phone, rating, reviews, image, lat, lng, openingDays, openingHours, googleMapsUrl, googlePlaceId } = req.body;
     if (!name || !type || !location || lat === undefined || lng === undefined) {
@@ -56,6 +63,12 @@ router.post("/", adminAuth, async (req, res) => {
 
 // PUT update facility (Admin only)
 router.put("/:id", adminAuth, async (req, res) => {
+  if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message: "MongoDB database is currently disconnected. Please check MONGO_URI in Vercel settings.",
+      offline: true,
+    });
+  }
   try {
     const { id } = req.params;
     const updated = await Facility.findByIdAndUpdate(id, req.body, { new: true });
@@ -70,6 +83,12 @@ router.put("/:id", adminAuth, async (req, res) => {
 
 // DELETE facility (Admin only)
 router.delete("/:id", adminAuth, async (req, res) => {
+  if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      message: "MongoDB database is currently disconnected. Please check MONGO_URI in Vercel settings.",
+      offline: true,
+    });
+  }
   try {
     const { id } = req.params;
     const deleted = await Facility.findByIdAndDelete(id);

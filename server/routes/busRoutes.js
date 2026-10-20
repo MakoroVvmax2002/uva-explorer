@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 const BusService = require("../models/BusService");
 
@@ -22,6 +23,12 @@ router.get("/", async (req, res) => {
 
 // POST /api/buses - Add a new bus service (Admin route)
 router.post("/", async (req, res) => {
+  if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      error: "MongoDB database is currently disconnected. Please check MONGO_URI in Vercel settings.",
+      offline: true,
+    });
+  }
   try {
     const {
       name,
@@ -75,6 +82,12 @@ router.post("/", async (req, res) => {
 
 // PUT /api/buses/:id - Update an existing bus service
 router.put("/:id", async (req, res) => {
+  if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      error: "MongoDB database is currently disconnected. Please check MONGO_URI in Vercel settings.",
+      offline: true,
+    });
+  }
   try {
     const updatedBus = await BusService.findByIdAndUpdate(
       req.params.id,
@@ -95,6 +108,12 @@ router.put("/:id", async (req, res) => {
 
 // DELETE /api/buses/:id - Remove a bus service
 router.delete("/:id", async (req, res) => {
+  if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      error: "MongoDB database is currently disconnected. Please check MONGO_URI in Vercel settings.",
+      offline: true,
+    });
+  }
   try {
     const deletedBus = await BusService.findByIdAndDelete(req.params.id);
     if (!deletedBus) {
